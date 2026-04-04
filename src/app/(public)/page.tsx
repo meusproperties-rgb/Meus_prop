@@ -36,7 +36,7 @@ export default async function HomePage() {
 
   return (
     <div className="bg-[#171717] text-white">
-      <section id="home" className="relative min-h-[880px] overflow-hidden">
+      <section id="home" className="relative min-h-[865px] overflow-hidden">
         <div className="absolute inset-0">
           <Image
             src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=2200&q=80"
@@ -46,28 +46,28 @@ export default async function HomePage() {
             className="object-cover"
             sizes="100vw"
           />
-          <div className="absolute inset-0 bg-black/58" />
+          <div className="absolute inset-0 bg-black/60" />
         </div>
 
-        <div className="relative z-10 mx-auto flex min-h-[880px] max-w-[1700px] items-center justify-center px-8 text-center lg:px-14">
-          <div className="max-w-[920px] pt-16">
-            <h1 className="font-display mb-6 text-[4.5rem] leading-[1] tracking-tight text-primary-foreground">
+        <div className="relative z-10 mx-auto flex min-h-[865px] max-w-[1600px] items-center justify-center px-8 text-center lg:px-14">
+          <div className="max-w-[980px] pt-10">
+            <h1 className="font-display mb-7 text-[4.5rem] font-semibold leading-[1] tracking-[-0.035em] text-primary-foreground">
               Where Capital Meets
               <span className="block">Dubai Real Estate</span>
             </h1>
-            <p className="mx-auto mt-6 max-w-[760px] text-[1rem] leading-[1.45] text-[#d5d7dc] sm:text-[1.15rem] md:text-[1.25rem]">
+            <p className="mx-auto mt-4 max-w-[790px] text-[1rem] leading-[1.45] text-[#d7dbe0] sm:text-[1.1rem] md:text-[1.2rem]">
               Investment-driven advisory backed by 8+ years of UAE market experience.
             </p>
             <div className="mt-12 flex flex-col items-center justify-center gap-5 sm:flex-row">
               <Link href="/properties">
-                <Button className="h-[56px] min-w-[218px] rounded-none bg-[#c62835] px-10 text-[16px] font-medium text-white hover:bg-[#b3222e]">
+                <Button className="h-[56px] min-w-[218px] rounded-none bg-[#c62835] px-10 text-[16px] font-semibold text-white hover:bg-[#b3222e]">
                   Explore Listings
                 </Button>
               </Link>
               <Link href="/#consultation">
                 <Button
                   variant="outline"
-                  className="h-[56px] min-w-[246px] rounded-none border-white bg-transparent px-10 text-[16px] font-medium text-white hover:bg-white/10 hover:text-white"
+                  className="h-[56px] min-w-[246px] rounded-none border-white bg-transparent px-10 text-[16px] font-semibold text-white hover:bg-white/10 hover:text-white"
                 >
                   Book Consultation
                 </Button>

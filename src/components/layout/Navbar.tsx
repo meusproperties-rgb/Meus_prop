@@ -33,16 +33,19 @@ export function Navbar() {
           : 'bg-[#121212]'
       )}
     >
-      <div className="mx-auto max-w-[1700px] px-8 lg:px-14">
+      <div className="mx-auto max-w-[1900px] px-10 lg:px-[72px]">
         <div className="flex h-20 items-center justify-between">
           <Logo />
 
-          <div className="hidden items-center gap-9 lg:flex">
+          <div className="hidden items-center gap-12 lg:flex">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-[13px] font-medium uppercase tracking-[0.08em] text-[#adadb0] transition-colors duration-200 hover:text-white"
+                className={cn(
+                  'text-[15px] font-semibold uppercase tracking-[0.06em] transition-colors duration-200 hover:text-white',
+                  link.label === 'Home' ? 'text-[#d12d3a]' : 'text-[#a9adb3]'
+                )}
               >
                 {link.label}
               </Link>

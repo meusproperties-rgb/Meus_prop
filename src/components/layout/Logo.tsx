@@ -6,8 +6,8 @@ interface LogoProps {
 
 export function Logo({ compact = false }: LogoProps) {
   return (
-    <Link href="/" className="flex items-center gap-3">
-      <div className="relative h-14 w-14 shrink-0">
+    <Link href="/" className="flex items-center gap-4">
+      <div className="relative h-[58px] w-[58px] shrink-0">
         <svg viewBox="0 0 72 72" className="h-full w-full" aria-hidden="true">
           <path d="M8 52V26l13-13 13 13" fill="none" stroke="#8e8f96" strokeWidth="4" strokeLinecap="square" />
           <path d="M20 52V34" fill="none" stroke="#8e8f96" strokeWidth="4" strokeLinecap="square" />
@@ -20,8 +20,8 @@ export function Logo({ compact = false }: LogoProps) {
         </svg>
       </div>
       <div className={compact ? 'leading-none' : 'leading-none'}>
-        <div className="font-display text-[18px] font-bold uppercase tracking-[0.06em] text-[#d7d7d9]">MEUS</div>
-        <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#8f9198]">Real Estate</div>
+        <div className="font-display text-[23px] font-semibold uppercase tracking-[-0.01em] text-[#d3d4d7]">MEUS</div>
+        <div className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#8f9198]">Real Estate</div>
       </div>
     </Link>
   );
