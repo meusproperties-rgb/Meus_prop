@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { Op } from 'sequelize';
+import { Op, WhereOptions } from 'sequelize';
 import { z } from 'zod';
 import { authOptions } from '@/lib/auth';
 import { Property, PropertyImage, User, Favorite } from '@/lib/db/index';
 import { propertySchema } from '@/lib/validations/index';
-
 type Params = { params: { id: string } };
 
 export async function GET(request: NextRequest, { params }: Params) {
@@ -13,12 +12,12 @@ export async function GET(request: NextRequest, { params }: Params) {
     const { id } = params;
 
     // Find by UUID or slug
-    const where = id.includes('-') && id.length > 30
+    const where: WhereOptions = id.includes('-') && id.length > 30
       ? { id }
       : { [Op.or]: [{ id }, { slug: id }] };
 
     const property = await Property.findOne({
-      where: where as Parameters<typeof Property.findOne>[0]['where'],
+      where,
       include: [
         {
           model: PropertyImage,
