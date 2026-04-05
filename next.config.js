@@ -17,6 +17,7 @@ const nextConfig = {
     ],
   },
   experimental: {
+    serverComponentsExternalPackages: ['sequelize', 'pg', 'pg-hstore'],
     serverActions: {
       allowedOrigins: ['localhost:3000'],
     },

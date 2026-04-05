@@ -7,6 +7,9 @@ import { Property, PropertyImage, User, Favorite } from '@/lib/db/index';
 import { propertySchema } from '@/lib/validations/index';
 type Params = { params: { id: string } };
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest, { params }: Params) {
   try {
     const { id } = params;

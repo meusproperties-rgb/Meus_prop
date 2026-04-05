@@ -83,3 +83,5 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';

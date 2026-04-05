@@ -1,10 +1,8 @@
 import { Sequelize } from 'sequelize';
 
-const DATABASE_URL = process.env.DATABASE_URL!;
-
-if (!DATABASE_URL) {
-  throw new Error('DATABASE_URL environment variable is not set');
-}
+const DATABASE_URL = process.env.DATABASE_URL;
+const FALLBACK_DATABASE_URL = 'postgres://postgres:postgres@127.0.0.1:5432/postgres';
+let hasWarnedAboutMissingDatabaseUrl = false;
 
 declare global {
   // eslint-disable-next-line no-var
@@ -13,7 +11,7 @@ declare global {
 
 const sequelize =
   global.sequelize ||
-  new Sequelize(DATABASE_URL, {
+  new Sequelize(DATABASE_URL ?? FALLBACK_DATABASE_URL, {
     dialect: 'postgres',
     dialectOptions: {
       ssl: {
@@ -29,6 +27,17 @@ const sequelize =
       idle: 10000,
     },
   });
+
+sequelize.addHook('beforeConnect', () => {
+  if (!process.env.DATABASE_URL) {
+    if (!hasWarnedAboutMissingDatabaseUrl) {
+      console.warn('DATABASE_URL environment variable is not set; database access is unavailable.');
+      hasWarnedAboutMissingDatabaseUrl = true;
+    }
+
+    throw new Error('DATABASE_URL environment variable is not set');
+  }
+});
 
 if (process.env.NODE_ENV !== 'production') {
   global.sequelize = sequelize;
