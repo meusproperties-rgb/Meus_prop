@@ -4,6 +4,7 @@ import { Op, WhereOptions } from 'sequelize';
 import { z } from 'zod';
 import { authOptions } from '@/lib/auth';
 import { Property, PropertyImage, User, Favorite } from '@/lib/db/index';
+import { PropertyAttributes } from '@/lib/db/models/Property';
 import { propertySchema } from '@/lib/validations/index';
 type Params = { params: { id: string } };
 
@@ -15,7 +16,7 @@ export async function GET(request: NextRequest, { params }: Params) {
     const { id } = params;
 
     // Find by UUID or slug
-    const where: WhereOptions = id.includes('-') && id.length > 30
+    const where: WhereOptions<PropertyAttributes> = id.includes('-') && id.length > 30
       ? { id }
       : { [Op.or]: [{ id }, { slug: id }] };
 
