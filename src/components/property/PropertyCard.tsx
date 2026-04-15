@@ -18,9 +18,9 @@ export function PropertyCard({ property, className }: PropertyCardProps) {
     property.description.length > 110 ? `${property.description.slice(0, 110).trim()}...` : property.description;
 
   return (
-    <Link href={`/properties/${property.slug}`} className={className}>
-      <article className="h-full bg-[#1e1e1e] transition-transform duration-300 hover:-translate-y-1">
-        <div className="relative h-[360px] w-full overflow-hidden">
+    <Link href={`/listings/${property.slug}`} className={className}>
+      <article className="h-full border border-white/10 bg-[#1e1e1e] transition-transform duration-300 hover:-translate-y-1">
+        <div className="relative h-[380px] w-full overflow-hidden">
           <Image
             src={imageUrl}
             alt={property.title}
@@ -30,9 +30,9 @@ export function PropertyCard({ property, className }: PropertyCardProps) {
           />
         </div>
 
-        <div className="px-8 pb-8 pt-9">
+        <div className="px-8 pb-9 pt-9">
           <div className="mb-4 flex items-center gap-3">
-            <p className="text-[16px] uppercase tracking-[0.12em] text-[#88909b]">
+            <p className="text-[14px] font-semibold uppercase tracking-[0.14em] text-[#88909b]">
               {property.district || property.city}
             </p>
             {property.features?.includes('Off-Plan') && (
@@ -42,14 +42,14 @@ export function PropertyCard({ property, className }: PropertyCardProps) {
             )}
           </div>
 
-          <h3 className="font-display text-2xl font-medium leading-tight tracking-tight text-white md:text-[30px]">
+          <h3 className="font-display text-[30px] font-medium leading-[1.1] tracking-tight text-white">
             {property.title}
           </h3>
-          <p className="mt-4 text-[20px] font-medium text-[#d12d3a] md:text-[22px]">{formatFullPrice(Number(property.price))}</p>
-          <p className="mt-5 min-h-[80px] text-base leading-relaxed text-[#91959e] md:text-[18px]">{summary}</p>
+          <p className="mt-4 text-[22px] font-medium text-[#d12d3a]">{formatFullPrice(Number(property.price))}</p>
+          <p className="mt-5 min-h-[84px] text-[18px] leading-relaxed text-[#91959e]">{summary}</p>
 
           <div className="mt-8">
-            <div className="flex h-[54px] w-full items-center justify-center bg-[#c62835] text-[16px] font-medium text-white">
+            <div className="flex h-[56px] w-full items-center justify-center bg-[#c62835] text-[16px] font-semibold uppercase tracking-[0.06em] text-white">
               View Details
             </div>
           </div>

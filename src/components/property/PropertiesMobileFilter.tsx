@@ -14,14 +14,14 @@ export function PropertiesMobileFilter() {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Button variant="outline" onClick={() => setOpen(true)} className="flex items-center gap-2">
+      <Button variant="outline" onClick={() => setOpen(true)} className="h-[52px] w-full justify-center gap-2 text-[13px] uppercase tracking-[0.08em] sm:w-auto">
         <SlidersHorizontal className="w-4 h-4" />
         Filters & Sort
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-sm max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] max-w-sm overflow-y-auto border border-white/10 bg-[#111111]">
           <DialogHeader>
-            <DialogTitle>Filter Properties</DialogTitle>
+            <DialogTitle className="font-display text-2xl tracking-tight text-white">Filter Properties</DialogTitle>
           </DialogHeader>
           <PropertyFilters onClose={() => setOpen(false)} />
         </DialogContent>
@@ -47,7 +47,7 @@ export function PropertiesPagination({ currentPage, totalPages, searchParams }: 
       }
     });
     params.set('page', String(page));
-    return `/properties?${params.toString()}`;
+    return `/listings?${params.toString()}`;
   };
 
   const pages = Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
@@ -58,7 +58,7 @@ export function PropertiesPagination({ currentPage, totalPages, searchParams }: 
   });
 
   return (
-    <div className="flex items-center justify-center gap-2">
+    <div className="flex items-center justify-center gap-2 py-2">
       <Link href={buildUrl(currentPage - 1)} aria-disabled={currentPage <= 1}>
         <Button
           variant="outline"
@@ -75,7 +75,7 @@ export function PropertiesPagination({ currentPage, totalPages, searchParams }: 
           <Button
             variant={page === currentPage ? 'default' : 'outline'}
             size="icon"
-            className={cn(page === currentPage && 'bg-primary text-primary-foreground')}
+            className={cn(page === currentPage && 'border-[#c62835] bg-[#c62835] text-white')}
           >
             {page}
           </Button>

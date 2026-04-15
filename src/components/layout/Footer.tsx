@@ -1,47 +1,30 @@
-import Link from 'next/link';
-import { Logo } from '@/components/layout/Logo';
+'use client';
 
-const footerLinks = {
-  Navigation: [
-    { label: 'Home', href: '/#home' },
-    { label: 'Listings', href: '/properties' },
-    { label: 'About', href: '/#about' },
-    { label: 'Contact', href: '/#consultation' },
-  ],
-  Services: [
-    { label: 'Property Sales', href: '/#services' },
-    { label: 'Off-Plan Investments', href: '/#services' },
-    { label: 'Rental & Leasing', href: '/#services' },
-    { label: 'Portfolio Advisory', href: '/#services' },
-  ],
-};
+import Link from 'next/link';
 
 export function Footer() {
   return (
-    <footer className="bg-[#111111] text-white">
-      <div className="bg-[#c62835] py-14 text-center text-white">
-        <Link href="/#consultation" className="text-[16px] font-medium">
-          Book Your Consultation
-        </Link>
-      </div>
-
-      <div className="mx-auto max-w-[1700px] px-8 py-20 lg:px-14">
-        <div className="mb-16 grid grid-cols-1 gap-12 md:grid-cols-4">
-          <div className="max-w-sm">
-            <div className="mb-10 h-[2px] w-20 bg-[#d12d3a]" />
-            <div className="mb-8">
-              <Logo />
-            </div>
-            <p className="text-[17px] leading-[1.7] text-[#8e9198]">
+    <footer className="bg-primary text-primary-foreground">
+      <div className="container mx-auto px-6 py-16">
+        <div className="mb-12 h-0.5 w-16 bg-accent" />
+        <div className="mb-16 grid grid-cols-1 gap-12 md:grid-cols-2 xl:grid-cols-4">
+          <div>
+            <img src="/lovable-assets/logo-vertical-color.png" alt="Meus Real Estate" className="mb-4 h-20 w-auto" />
+            <p className="text-sm leading-relaxed text-primary-foreground/60">
               Dubai&apos;s strategic luxury &amp; off-plan property advisors. Delivering premium real estate solutions for discerning investors.
             </p>
           </div>
 
           <div>
-            <h4 className="mb-8 text-[16px] uppercase tracking-[0.08em] text-[#7d8086]">Navigation</h4>
-            <div className="space-y-4">
-              {footerLinks.Navigation.map((item) => (
-                <Link key={item.label} href={item.href} className="block text-[17px] text-[#a3a5aa] transition-colors hover:text-white">
+            <h4 className="mb-6 text-xs uppercase tracking-widest text-primary-foreground/40">Navigation</h4>
+            <div className="flex flex-col gap-3">
+              {[
+                { label: 'Home', href: '/' },
+                { label: 'Listings', href: '/listings' },
+                { label: 'About', href: '/about' },
+                { label: 'Contact', href: '/contact' },
+              ].map((item) => (
+                <Link key={item.label} href={item.href} className="text-sm text-primary-foreground/60 transition-colors hover:text-accent">
                   {item.label}
                 </Link>
               ))}
@@ -49,19 +32,19 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="mb-8 text-[16px] uppercase tracking-[0.08em] text-[#7d8086]">Services</h4>
-            <div className="space-y-4">
-              {footerLinks.Services.map((item) => (
-                <Link key={item.label} href={item.href} className="block text-[17px] text-[#a3a5aa] transition-colors hover:text-white">
-                  {item.label}
-                </Link>
+            <h4 className="mb-6 text-xs uppercase tracking-widest text-primary-foreground/40">Services</h4>
+            <div className="flex flex-col gap-3">
+              {['Property Sales', 'Off-Plan Investments', 'Rental & Leasing', 'Portfolio Advisory'].map((item) => (
+                <span key={item} className="text-sm text-primary-foreground/60">
+                  {item}
+                </span>
               ))}
             </div>
           </div>
 
           <div>
-            <h4 className="mb-8 text-[16px] uppercase tracking-[0.08em] text-[#7d8086]">Contact</h4>
-            <div className="space-y-4 text-[17px] text-[#a3a5aa]">
+            <h4 className="mb-6 text-xs uppercase tracking-widest text-primary-foreground/40">Contact</h4>
+            <div className="flex flex-col gap-3 text-sm text-primary-foreground/60">
               <p>Downtown Dubai, UAE</p>
               <p>+971 4 XXX XXXX</p>
               <p>info@luxedubai.ae</p>
@@ -69,8 +52,8 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-white/10 pt-10 text-center">
-          <p className="text-[15px] text-[#6f7278]">&copy; 2026 Meus Real Estate. All rights reserved.</p>
+        <div className="mt-12 border-t border-primary-foreground/10 pt-8 text-center text-xs text-primary-foreground/40">
+          © {new Date().getFullYear()} Meus Real Estate - All rights reserved.
         </div>
       </div>
     </footer>

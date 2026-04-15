@@ -27,7 +27,7 @@ export function PropertyGallery({ images, title }: PropertyGalleryProps) {
   return (
     <>
       {/* Grid Gallery */}
-      <div className="gallery-grid rounded-2xl overflow-hidden cursor-pointer" onClick={() => openLightbox(0)}>
+      <div className="gallery-grid cursor-pointer overflow-hidden" onClick={() => openLightbox(0)}>
         {gridImages.map((img, index) => (
           <div key={img.id} className="relative overflow-hidden group" onClick={(e) => { e.stopPropagation(); openLightbox(index); }}>
             <Image
@@ -56,7 +56,7 @@ export function PropertyGallery({ images, title }: PropertyGalleryProps) {
       {displayImages.length > 1 && (
         <button
           onClick={() => openLightbox(0)}
-          className="mt-3 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="mt-3 flex items-center gap-2 text-sm text-[#8f939c] transition-colors hover:text-white"
         >
           <Grid3X3 className="w-4 h-4" />
           View all {displayImages.length} photos
@@ -69,11 +69,11 @@ export function PropertyGallery({ images, title }: PropertyGalleryProps) {
           className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center"
           onClick={closeLightbox}
         >
-          <button onClick={closeLightbox} className="absolute top-4 right-4 text-white/70 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors z-10">
+          <button onClick={closeLightbox} className="absolute right-4 top-4 z-10 p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white">
             <X className="w-6 h-6" />
           </button>
 
-          <button onClick={(e) => { e.stopPropagation(); prev(); }} className="absolute left-4 text-white/70 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors z-10">
+          <button onClick={(e) => { e.stopPropagation(); prev(); }} className="absolute left-4 z-10 p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white">
             <ChevronLeft className="w-8 h-8" />
           </button>
 
@@ -87,7 +87,7 @@ export function PropertyGallery({ images, title }: PropertyGalleryProps) {
             />
           </div>
 
-          <button onClick={(e) => { e.stopPropagation(); next(); }} className="absolute right-4 text-white/70 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors z-10">
+          <button onClick={(e) => { e.stopPropagation(); next(); }} className="absolute right-4 z-10 p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white">
             <ChevronRight className="w-8 h-8" />
           </button>
 
@@ -97,7 +97,7 @@ export function PropertyGallery({ images, title }: PropertyGalleryProps) {
               <button
                 key={img.id}
                 onClick={(e) => { e.stopPropagation(); setLightboxIndex(i); }}
-                className={`relative w-14 h-10 rounded overflow-hidden border-2 transition-all shrink-0 ${i === lightboxIndex ? 'border-white' : 'border-white/30 opacity-60 hover:opacity-100'}`}
+                className={`relative h-10 w-14 shrink-0 overflow-hidden border-2 transition-all ${i === lightboxIndex ? 'border-white' : 'border-white/30 opacity-60 hover:opacity-100'}`}
               >
                 <Image src={img.url} alt="" fill className="object-cover" sizes="56px" />
               </button>

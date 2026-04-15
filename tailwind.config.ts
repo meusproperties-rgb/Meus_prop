@@ -70,8 +70,8 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ['var(--font-manrope)', 'system-ui', 'sans-serif'],
-        display: ['var(--font-manrope)', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-body)', 'system-ui', 'sans-serif'],
+        display: ['var(--font-display)', 'system-ui', 'sans-serif'],
         mono: ['var(--font-mono)', 'monospace'],
       },
       borderRadius: {

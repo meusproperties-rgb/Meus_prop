@@ -76,14 +76,14 @@ export function EnquiryForm({ propertyId, propertyTitle, ownerPhone }: EnquiryFo
   return (
     <div>
       <div className="mb-5 flex items-center gap-2">
-        <MessageSquare className="h-5 w-5 text-primary" />
-        <h3 className="font-display text-lg font-semibold">Enquire About This Property</h3>
+        <MessageSquare className="h-5 w-5 text-[#d12d3a]" />
+        <h3 className="font-display text-xl font-semibold tracking-tight text-white">Enquire About This Property</h3>
       </div>
 
       {ownerPhone && (
         <a
           href={`tel:${ownerPhone}`}
-          className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 py-3 font-medium text-white transition-colors hover:bg-emerald-600"
+          className="mb-4 flex w-full items-center justify-center gap-2 bg-emerald-600 py-3 font-medium text-white transition-colors hover:bg-emerald-700"
         >
           <Phone className="h-4 w-4" />
           Call Agent: {ownerPhone}
@@ -129,7 +129,7 @@ export function EnquiryForm({ propertyId, propertyTitle, ownerPhone }: EnquiryFo
           )}
         </Button>
 
-        <p className="text-center text-xs text-muted-foreground">
+        <p className="text-center text-xs text-[#7d8086]">
           Static demo flow for now. Submission is stored only in the UI state.
         </p>
       </form>
