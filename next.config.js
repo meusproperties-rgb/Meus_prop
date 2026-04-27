@@ -1,35 +1,27 @@
-export const runtime = "nodejs"; // ✅ IMPORTANT: forces Node runtime
-
-import NextAuth from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import { SequelizeAdapter } from "@auth/sequelize-adapter";
-import { Sequelize } from "sequelize";
-
-// 👉 Initialize Sequelize
-const sequelize = new Sequelize(process.env.DATABASE_URL, {
-  dialect: "postgres",
-  logging: false,
-});
-
-// 👉 NextAuth config
-const handler = NextAuth({
-  adapter: SequelizeAdapter(sequelize),
-  providers: [
-    CredentialsProvider({
-      name: "Credentials",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
       },
-      async authorize(credentials) {
-        // 👉 your existing auth logic here
-        return null;
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
       },
-    }),
-  ],
-  session: {
-    strategy: "jwt",
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+      },
+    ],
   },
-});
+  experimental: {
+    serverComponentsExternalPackages: ['sequelize', 'pg', 'pg-hstore'],
+    serverActions: {
+      allowedOrigins: ['localhost:3000'],
+    },
+  },
+};
 
-export { handler as GET, handler as POST };
+module.exports = nextConfig;
