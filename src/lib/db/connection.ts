@@ -1,4 +1,5 @@
 import { Sequelize } from 'sequelize';
+import pg from 'pg';
 
 const DATABASE_URL = process.env.DATABASE_URL;
 const FALLBACK_DATABASE_URL = 'postgres://postgres:postgres@127.0.0.1:5432/postgres';
@@ -30,6 +31,7 @@ const sequelize =
   global.sequelize ||
   new Sequelize(connectionString, {
     dialect: 'postgres',
+    dialectModule: pg,
     dialectOptions: useSsl
       ? {
           ssl: {
