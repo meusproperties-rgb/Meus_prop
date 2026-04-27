@@ -41,21 +41,40 @@ export function EnquiryForm({ propertyId, propertyTitle, ownerPhone }: EnquiryFo
 
   const onSubmit = async (_data: EnquiryFormData) => {
     setLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 700));
-    setSent(true);
-    toast({
-      title: 'Enquiry saved locally',
-      description: 'This page is in static demo mode. We can connect the backend later.',
-      variant: 'success',
-    } as Parameters<typeof toast>[0]);
-    reset({
-      propertyId,
-      name: '',
-      email: '',
-      phone: '',
-      message: defaultMessage,
-    });
-    setLoading(false);
+    try {
+      const response = await fetch('/api/enquiries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(_data),
+      });
+      const json = await response.json();
+
+      if (!response.ok || !json.success) {
+        throw new Error(json.error || 'Failed to send enquiry');
+      }
+
+      setSent(true);
+      toast({
+        title: 'Enquiry sent',
+        description: 'Your message has been submitted successfully.',
+        variant: 'success',
+      } as Parameters<typeof toast>[0]);
+      reset({
+        propertyId,
+        name: '',
+        email: '',
+        phone: '',
+        message: defaultMessage,
+      });
+    } catch (error) {
+      toast({
+        title: 'Unable to send enquiry',
+        description: error instanceof Error ? error.message : 'Something went wrong.',
+        variant: 'destructive',
+      } as Parameters<typeof toast>[0]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (sent) {
@@ -64,9 +83,9 @@ export function EnquiryForm({ propertyId, propertyTitle, ownerPhone }: EnquiryFo
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
           <Send className="h-7 w-7 text-emerald-600" />
         </div>
-        <h3 className="mb-2 font-display text-lg font-semibold">Demo Enquiry Captured</h3>
+        <h3 className="mb-2 font-display text-lg font-semibold">Enquiry Sent</h3>
         <p className="mb-4 text-sm text-muted-foreground">
-          The form is working in static mode and ready for backend hookup later.
+          Your enquiry is now stored in the backend and visible in the admin enquiries panel.
         </p>
         <Button variant="outline" size="sm" onClick={() => setSent(false)}>Send Another</Button>
       </div>
@@ -130,7 +149,7 @@ export function EnquiryForm({ propertyId, propertyTitle, ownerPhone }: EnquiryFo
         </Button>
 
         <p className="text-center text-xs text-[#7d8086]">
-          Static demo flow for now. Submission is stored only in the UI state.
+          Submissions are delivered to the backend enquiries API.
         </p>
       </form>
     </div>

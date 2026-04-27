@@ -2,11 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { z } from 'zod';
 import { authOptions } from '@/lib/auth';
-import { Enquiry, Property, User } from '@/lib/db/index';
+import { ensureDatabase, Enquiry, Property, User } from '@/lib/db/index';
 import { enquirySchema } from '@/lib/validations/index';
 
 export async function GET(request: NextRequest) {
   try {
+    await ensureDatabase();
+
     const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== 'admin') {
       return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
@@ -59,6 +61,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    await ensureDatabase();
+
     const body = await request.json();
     const validated = enquirySchema.parse(body);
 

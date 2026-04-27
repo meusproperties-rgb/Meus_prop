@@ -34,7 +34,7 @@ export default function LoginPage() {
       if (result?.error) {
         setError(result.error === 'CredentialsSignin' ? 'Invalid email or password' : result.error);
       } else {
-        router.push('/');
+        router.push('/admin');
         router.refresh();
       }
     } catch {
@@ -49,6 +49,9 @@ export default function LoginPage() {
       <div className="mb-8">
         <h1 className="font-display text-3xl font-bold text-foreground mb-2">Welcome back</h1>
         <p className="text-muted-foreground">Sign in to your account to continue</p>
+        <p className="mt-2 text-xs text-muted-foreground">
+          Temporary admin access is enabled for setup.
+        </p>
       </div>
 
       {error && (

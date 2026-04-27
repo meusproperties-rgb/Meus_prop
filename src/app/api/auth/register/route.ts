@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
-import { User } from '@/lib/db/index';
+import { ensureDatabase, User } from '@/lib/db/index';
 import { registerSchema } from '@/lib/validations/index';
 
 export async function POST(request: NextRequest) {
   try {
+    await ensureDatabase();
+
     const body = await request.json();
     const validated = registerSchema.parse(body);
 

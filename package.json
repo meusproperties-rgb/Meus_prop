@@ -7,9 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "db:check": "node scripts/check-db.js",
     "db:migrate": "node scripts/migrate.js",
     "db:seed": "node scripts/seed.js",
-    "db:reset": "node scripts/reset.js"
+    "db:reset": "node scripts/reset.js",
+    "db:create-admin": "node scripts/create-admin.js"
   },
   "dependencies": {
     "@auth/sequelize-adapter": "^1.2.0",

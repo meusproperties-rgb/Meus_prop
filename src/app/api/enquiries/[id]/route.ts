@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { Enquiry } from '@/lib/db/index';
+import { ensureDatabase, Enquiry } from '@/lib/db/index';
 
 type Params = { params: { id: string } };
 
 export async function PATCH(request: NextRequest, { params }: Params) {
   try {
+    await ensureDatabase();
+
     const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== 'admin') {
       return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
@@ -39,6 +41,8 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
 export async function DELETE(request: NextRequest, { params }: Params) {
   try {
+    await ensureDatabase();
+
     const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== 'admin') {
       return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });

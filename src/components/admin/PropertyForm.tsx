@@ -1,27 +1,34 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import Image from 'next/image';
+import { useCallback, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import {
-  Upload, X, Star, Eye, EyeOff, Loader2, Plus, Trash2
-} from 'lucide-react';
+import { Eye, Loader2, Star, Trash2, Upload, X } from 'lucide-react';
+import { AdminPanel } from '@/components/admin/AdminUI';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/components';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Textarea,
+} from '@/components/ui/components';
 import { toast } from '@/components/ui/toaster';
-import { propertySchema, type PropertyFormData } from '@/lib/validations/index';
-import { PROPERTY_AMENITIES, DUBAI_DISTRICTS } from '@/lib/utils/index';
-import { cn } from '@/lib/utils/index';
 import type { Property } from '@/types/index';
-import Image from 'next/image';
+import { propertySchema, type PropertyFormData } from '@/lib/validations/index';
+import { cn, DUBAI_DISTRICTS, PROPERTY_AMENITIES } from '@/lib/utils/index';
 
 interface PropertyFormProps {
   property?: Property;
   mode: 'create' | 'edit';
 }
+
+const fieldClassName = 'border-border bg-muted/60';
 
 export function PropertyForm({ property, mode }: PropertyFormProps) {
   const router = useRouter();
@@ -30,7 +37,12 @@ export function PropertyForm({ property, mode }: PropertyFormProps) {
   const [uploadedImages, setUploadedImages] = useState(property?.images || []);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>(property?.amenities || []);
 
-  const { register, handleSubmit, control, watch, formState: { errors } } = useForm<PropertyFormData>({
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<PropertyFormData>({
     resolver: zodResolver(propertySchema),
     defaultValues: property
       ? {
@@ -58,40 +70,53 @@ export function PropertyForm({ property, mode }: PropertyFormProps) {
           coverImage: property.coverImage ?? undefined,
           videoUrl: property.videoUrl ?? undefined,
         }
-      : { city: 'Dubai', country: 'UAE', isActive: true, isFeatured: false, amenities: [], features: [] },
+      : {
+          city: 'Dubai',
+          country: 'UAE',
+          isActive: true,
+          isFeatured: false,
+          amenities: [],
+          features: [],
+        },
   });
 
-  const handleImageSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    const newFiles = files.slice(0, 20 - imageFiles.length - uploadedImages.length).map((file) => ({
-      file,
-      preview: URL.createObjectURL(file),
-    }));
-    setImageFiles((prev) => [...prev, ...newFiles]);
+  const handleImageSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    const newFiles = files
+      .slice(0, 20 - imageFiles.length - uploadedImages.length)
+      .map((file) => ({
+        file,
+        preview: URL.createObjectURL(file),
+      }));
+
+    setImageFiles((previous) => [...previous, ...newFiles]);
   }, [imageFiles.length, uploadedImages.length]);
 
   const removeNewImage = (index: number) => {
     URL.revokeObjectURL(imageFiles[index].preview);
-    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setImageFiles((previous) => previous.filter((_, currentIndex) => currentIndex !== index));
   };
 
   const deleteUploadedImage = async (imageId: string) => {
     if (!property?.id) return;
+
     try {
       await fetch(`/api/properties/${property.id}/images`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ imageId }),
       });
-      setUploadedImages((prev) => prev.filter((img) => img.id !== imageId));
+      setUploadedImages((previous) => previous.filter((image) => image.id !== imageId));
     } catch {
       toast({ title: 'Failed to delete image', variant: 'destructive' } as Parameters<typeof toast>[0]);
     }
   };
 
   const toggleAmenity = (amenity: string) => {
-    setSelectedAmenities((prev) =>
-      prev.includes(amenity) ? prev.filter((a) => a !== amenity) : [...prev, amenity]
+    setSelectedAmenities((previous) =>
+      previous.includes(amenity)
+        ? previous.filter((value) => value !== amenity)
+        : [...previous, amenity]
     );
   };
 
@@ -105,42 +130,45 @@ export function PropertyForm({ property, mode }: PropertyFormProps) {
 
   const onSubmit = async (data: PropertyFormData) => {
     setLoading(true);
+
     try {
       const payload = { ...data, amenities: selectedAmenities };
       let propertyId = property?.id;
 
       if (mode === 'create') {
-        const res = await fetch('/api/properties', {
+        const response = await fetch('/api/properties', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
-        const json = await res.json();
+        const json = await response.json();
         if (!json.success) throw new Error(json.error);
         propertyId = json.data.id;
       } else {
-        const res = await fetch(`/api/properties/${property!.id}`, {
+        const response = await fetch(`/api/properties/${property!.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
-        const json = await res.json();
+        const json = await response.json();
         if (!json.success) throw new Error(json.error);
       }
 
-      // Upload new images
       if (imageFiles.length > 0 && propertyId) {
-        const base64Images = await Promise.all(imageFiles.map((f) => fileToBase64(f.file)));
-        const imgRes = await fetch(`/api/properties/${propertyId}/images`, {
+        const base64Images = await Promise.all(imageFiles.map((item) => fileToBase64(item.file)));
+        const response = await fetch(`/api/properties/${propertyId}/images`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ images: base64Images.map((base64) => ({ base64 })) }),
         });
-        const imgJson = await imgRes.json();
-        if (!imgJson.success) console.error('Image upload failed:', imgJson.error);
+        const json = await response.json();
+        if (!json.success) console.error('Image upload failed:', json.error);
       }
 
-      toast({ title: mode === 'create' ? '✅ Property created!' : '✅ Property updated!', variant: 'success' } as Parameters<typeof toast>[0]);
+      toast({
+        title: mode === 'create' ? 'Property created' : 'Property updated',
+        variant: 'success',
+      } as Parameters<typeof toast>[0]);
       router.push('/admin/properties');
     } catch (error) {
       toast({ title: 'Error', description: String(error), variant: 'destructive' } as Parameters<typeof toast>[0]);
@@ -149,185 +177,240 @@ export function PropertyForm({ property, mode }: PropertyFormProps) {
     }
   };
 
-  const FormSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
-    <div className="bg-card rounded-xl border border-border/50 p-6 space-y-4 shadow-sm">
-      <h3 className="font-display font-semibold text-base border-b border-border/50 pb-3">{title}</h3>
-      {children}
-    </div>
-  );
-
   const FieldError = ({ name }: { name: keyof PropertyFormData }) =>
-    errors[name] ? <p className="text-xs text-destructive mt-1">{errors[name]?.message as string}</p> : null;
+    errors[name] ? <p className="mt-1 text-xs text-destructive">{errors[name]?.message as string}</p> : null;
+
+  const FormSection = ({
+    title,
+    description,
+    children,
+  }: {
+    title: string;
+    description?: string;
+    children: React.ReactNode;
+  }) => (
+    <AdminPanel title={title} description={description} className="shadow-none">
+      <div className="space-y-4">{children}</div>
+    </AdminPanel>
+  );
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* Basic info */}
-      <FormSection title="Basic Information">
+      <FormSection
+        title="Basic Information"
+        description="The public-facing title and descriptive copy for this property."
+      >
         <div className="space-y-1.5">
           <Label>Title *</Label>
-          <Input placeholder="e.g. Luxurious 3BR Apartment in Downtown Dubai" {...register('title')} />
+          <Input className={fieldClassName} placeholder="e.g. Luxurious 3BR Apartment in Downtown Dubai" {...register('title')} />
           <FieldError name="title" />
         </div>
 
         <div className="space-y-1.5">
           <Label>Description *</Label>
-          <Textarea rows={5} placeholder="Describe the property in detail..." {...register('description')} />
+          <Textarea className={fieldClassName} rows={5} placeholder="Describe the property in detail..." {...register('description')} />
           <FieldError name="description" />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label>Property Type *</Label>
-            <Controller name="type" control={control} render={({ field }) => (
-              <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
-                <SelectContent>
-                  {['apartment', 'villa', 'penthouse', 'townhouse', 'commercial', 'land'].map((t) => (
-                    <SelectItem key={t} value={t} className="capitalize">{t}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )} />
+            <Controller
+              name="type"
+              control={control}
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger className={fieldClassName}>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {['apartment', 'villa', 'penthouse', 'townhouse', 'commercial', 'land'].map((type) => (
+                      <SelectItem key={type} value={type} className="capitalize">
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
             <FieldError name="type" />
           </div>
 
           <div className="space-y-1.5">
             <Label>Status *</Label>
-            <Controller name="status" control={control} render={({ field }) => (
-              <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger><SelectValue placeholder="Select status" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="for_sale">For Sale</SelectItem>
-                  <SelectItem value="for_rent">For Rent</SelectItem>
-                  <SelectItem value="sold">Sold</SelectItem>
-                  <SelectItem value="rented">Rented</SelectItem>
-                </SelectContent>
-              </Select>
-            )} />
+            <Controller
+              name="status"
+              control={control}
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger className={fieldClassName}>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="for_sale">For Sale</SelectItem>
+                    <SelectItem value="for_rent">For Rent</SelectItem>
+                    <SelectItem value="sold">Sold</SelectItem>
+                    <SelectItem value="rented">Rented</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </div>
         </div>
       </FormSection>
 
-      {/* Pricing & Area */}
-      <FormSection title="Pricing & Size">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <FormSection
+        title="Pricing & Size"
+        description="Pricing and dimensions used across cards, filters, and detail pages."
+      >
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label>Price (AED) *</Label>
-            <Input type="number" placeholder="e.g. 2500000" {...register('price', { valueAsNumber: true })} />
+            <Input className={fieldClassName} type="number" placeholder="e.g. 2500000" {...register('price', { valueAsNumber: true })} />
             <FieldError name="price" />
           </div>
           <div className="space-y-1.5">
             <Label>Area (sqft) *</Label>
-            <Input type="number" placeholder="e.g. 1200" {...register('area', { valueAsNumber: true })} />
+            <Input className={fieldClassName} type="number" placeholder="e.g. 1200" {...register('area', { valueAsNumber: true })} />
             <FieldError name="area" />
           </div>
           <div className="space-y-1.5">
             <Label>Bedrooms</Label>
-            <Input type="number" min={0} {...register('bedrooms', { valueAsNumber: true })} />
+            <Input className={fieldClassName} type="number" min={0} {...register('bedrooms', { valueAsNumber: true })} />
           </div>
           <div className="space-y-1.5">
             <Label>Bathrooms</Label>
-            <Input type="number" min={0} {...register('bathrooms', { valueAsNumber: true })} />
+            <Input className={fieldClassName} type="number" min={0} {...register('bathrooms', { valueAsNumber: true })} />
           </div>
           <div className="space-y-1.5">
             <Label>Parking Spaces</Label>
-            <Input type="number" min={0} {...register('parkingSpaces', { valueAsNumber: true })} />
+            <Input className={fieldClassName} type="number" min={0} {...register('parkingSpaces', { valueAsNumber: true })} />
           </div>
           <div className="space-y-1.5">
             <Label>Furnishing</Label>
-            <Controller name="furnishing" control={control} render={({ field }) => (
-              <Select value={field.value || ''} onValueChange={field.onChange}>
-                <SelectTrigger><SelectValue placeholder="Select furnishing" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="furnished">Furnished</SelectItem>
-                  <SelectItem value="semi_furnished">Semi Furnished</SelectItem>
-                  <SelectItem value="unfurnished">Unfurnished</SelectItem>
-                </SelectContent>
-              </Select>
-            )} />
+            <Controller
+              name="furnishing"
+              control={control}
+              render={({ field }) => (
+                <Select value={field.value || ''} onValueChange={field.onChange}>
+                  <SelectTrigger className={fieldClassName}>
+                    <SelectValue placeholder="Select furnishing" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="furnished">Furnished</SelectItem>
+                    <SelectItem value="semi_furnished">Semi Furnished</SelectItem>
+                    <SelectItem value="unfurnished">Unfurnished</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </div>
           <div className="space-y-1.5">
             <Label>Floor</Label>
-            <Input type="number" {...register('floor', { valueAsNumber: true })} />
+            <Input className={fieldClassName} type="number" {...register('floor', { valueAsNumber: true })} />
           </div>
           <div className="space-y-1.5">
             <Label>Year Built</Label>
-            <Input type="number" placeholder="e.g. 2022" {...register('yearBuilt', { valueAsNumber: true })} />
+            <Input className={fieldClassName} type="number" placeholder="e.g. 2022" {...register('yearBuilt', { valueAsNumber: true })} />
           </div>
         </div>
       </FormSection>
 
-      {/* Location */}
-      <FormSection title="Location">
+      <FormSection
+        title="Location"
+        description="Address details for internal reference and the public listing page."
+      >
         <div className="space-y-1.5">
           <Label>Address *</Label>
-          <Input placeholder="Full address" {...register('address')} />
+          <Input className={fieldClassName} placeholder="Full address" {...register('address')} />
           <FieldError name="address" />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="space-y-1.5">
             <Label>City *</Label>
-            <Input {...register('city')} />
+            <Input className={fieldClassName} {...register('city')} />
           </div>
           <div className="space-y-1.5">
             <Label>District</Label>
-            <Controller name="district" control={control} render={({ field }) => (
-              <Select value={field.value || ''} onValueChange={field.onChange}>
-                <SelectTrigger><SelectValue placeholder="Select district" /></SelectTrigger>
-                <SelectContent>
-                  {DUBAI_DISTRICTS.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            )} />
+            <Controller
+              name="district"
+              control={control}
+              render={({ field }) => (
+                <Select value={field.value || ''} onValueChange={field.onChange}>
+                  <SelectTrigger className={fieldClassName}>
+                    <SelectValue placeholder="Select district" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DUBAI_DISTRICTS.map((district) => (
+                      <SelectItem key={district} value={district}>
+                        {district}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </div>
           <div className="space-y-1.5">
             <Label>Country *</Label>
-            <Input {...register('country')} />
+            <Input className={fieldClassName} {...register('country')} />
           </div>
         </div>
       </FormSection>
 
-      {/* Images */}
-      <FormSection title="Images">
-        {uploadedImages.length > 0 && (
-          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-4">
-            {uploadedImages.map((img) => (
-              <div key={img.id} className="relative aspect-square rounded-lg overflow-hidden group">
-                <Image src={img.url} alt="" fill className="object-cover" sizes="120px" />
+      <FormSection
+        title="Images"
+        description="Upload photography for the gallery. Strong cover imagery will improve the listing preview."
+      >
+        {uploadedImages.length > 0 ? (
+          <div className="mb-4 grid grid-cols-3 gap-2 sm:grid-cols-5">
+            {uploadedImages.map((image) => (
+              <div key={image.id} className="group relative aspect-square overflow-hidden rounded-lg">
+                <Image src={image.url} alt="" fill className="object-cover" sizes="120px" />
                 <button
                   type="button"
-                  onClick={() => deleteUploadedImage(img.id)}
-                  className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={() => deleteUploadedImage(image.id)}
+                  className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100"
                 >
-                  <Trash2 className="w-4 h-4 text-white" />
+                  <Trash2 className="h-4 w-4 text-white" />
                 </button>
               </div>
             ))}
           </div>
-        )}
+        ) : null}
 
-        {imageFiles.length > 0 && (
-          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-4">
-            {imageFiles.map((f, i) => (
-              <div key={i} className="relative aspect-square rounded-lg overflow-hidden group">
-                <Image src={f.preview} alt="" fill className="object-cover" sizes="120px" />
-                <button type="button" onClick={() => removeNewImage(i)} className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/70 text-white flex items-center justify-center">
-                  <X className="w-3 h-3" />
+        {imageFiles.length > 0 ? (
+          <div className="mb-4 grid grid-cols-3 gap-2 sm:grid-cols-5">
+            {imageFiles.map((image, index) => (
+              <div key={index} className="group relative aspect-square overflow-hidden rounded-lg">
+                <Image src={image.preview} alt="" fill className="object-cover" sizes="120px" />
+                <button
+                  type="button"
+                  onClick={() => removeNewImage(index)}
+                  className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/70 text-white"
+                >
+                  <X className="h-3 w-3" />
                 </button>
-                <div className="absolute bottom-1 left-1 text-xs bg-black/60 text-white px-1 rounded">New</div>
+                <div className="absolute bottom-1 left-1 rounded bg-black/60 px-1 text-xs text-white">New</div>
               </div>
             ))}
           </div>
-        )}
+        ) : null}
 
-        <label className={cn(
-          'border-2 border-dashed border-border rounded-xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-primary/50 hover:bg-accent transition-colors',
-          imageFiles.length + uploadedImages.length >= 20 && 'opacity-50 cursor-not-allowed'
-        )}>
-          <Upload className="w-6 h-6 text-muted-foreground" />
+        <label
+          className={cn(
+            'flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-muted/40 p-8 transition-colors hover:border-primary/40 hover:bg-primary/5',
+            imageFiles.length + uploadedImages.length >= 20 && 'cursor-not-allowed opacity-50'
+          )}
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <Upload className="h-6 w-6" />
+          </div>
           <div className="text-center">
-            <p className="text-sm font-medium">Click to upload images</p>
-            <p className="text-xs text-muted-foreground">PNG, JPG, WEBP up to 10MB each. Max 20 images.</p>
+            <p className="text-sm font-medium">Drag and drop images here</p>
+            <p className="text-xs text-muted-foreground">
+              Or click to browse. PNG, JPG, WEBP up to 10MB each. Max 20 images.
+            </p>
           </div>
           <input
             type="file"
@@ -340,63 +423,88 @@ export function PropertyForm({ property, mode }: PropertyFormProps) {
         </label>
       </FormSection>
 
-      {/* Amenities */}
-      <FormSection title="Amenities">
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+      <FormSection
+        title="Amenities"
+        description="Select the features that add the most value for buyers and renters."
+      >
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {PROPERTY_AMENITIES.map((amenity) => (
             <button
               key={amenity}
               type="button"
               onClick={() => toggleAmenity(amenity)}
               className={cn(
-                'px-3 py-2 rounded-lg text-xs font-medium border text-left transition-all',
+                'rounded-lg border px-3 py-2 text-left text-xs font-medium transition-all',
                 selectedAmenities.includes(amenity)
-                  ? 'bg-primary text-primary-foreground border-primary'
-                  : 'border-border hover:border-primary/50 hover:bg-accent'
+                  ? 'border-primary bg-primary text-primary-foreground'
+                  : 'border-border bg-muted/40 hover:border-primary/40 hover:bg-primary/5'
               )}
             >
-              {selectedAmenities.includes(amenity) && '✓ '}{amenity}
+              {selectedAmenities.includes(amenity) ? '✓ ' : ''}
+              {amenity}
             </button>
           ))}
         </div>
       </FormSection>
 
-      {/* Settings */}
-      <FormSection title="Settings">
+      <FormSection
+        title="Visibility"
+        description="Control whether this property is promoted or visible on the public site."
+      >
         <div className="flex flex-col gap-3">
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" {...register('isFeatured')} className="w-4 h-4 rounded accent-primary" />
-            <div>
-              <p className="text-sm font-medium flex items-center gap-1.5">
-                <Star className="w-4 h-4 text-gold-500" /> Featured Property
-              </p>
-              <p className="text-xs text-muted-foreground">Show on home page and featured section</p>
+          <label className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-border bg-muted/40 p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <Star className="h-4 w-4" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">Featured Property</p>
+                <p className="text-xs text-muted-foreground">Show on the home page and featured section.</p>
+              </div>
             </div>
+            <input type="checkbox" {...register('isFeatured')} className="h-4 w-4 rounded accent-primary" />
           </label>
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" {...register('isActive')} className="w-4 h-4 rounded accent-primary" />
-            <div>
-              <p className="text-sm font-medium flex items-center gap-1.5">
-                <Eye className="w-4 h-4 text-emerald-500" /> Active / Visible
-              </p>
-              <p className="text-xs text-muted-foreground">Show in search results and listings</p>
+          <label className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-border bg-muted/40 p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600">
+                <Eye className="h-4 w-4" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">Active / Visible</p>
+                <p className="text-xs text-muted-foreground">Show in search results and property listings.</p>
+              </div>
             </div>
+            <input type="checkbox" {...register('isActive')} className="h-4 w-4 rounded accent-primary" />
           </label>
         </div>
       </FormSection>
 
-      {/* Actions */}
-      <div className="flex gap-3">
-        <Button type="submit" variant="gold" disabled={loading} className="flex items-center gap-2">
-          {loading ? (
-            <><Loader2 className="w-4 h-4 animate-spin" /> {mode === 'create' ? 'Creating...' : 'Saving...'}</>
-          ) : (
-            mode === 'create' ? '+ Create Property' : '✓ Save Changes'
-          )}
-        </Button>
-        <Button type="button" variant="outline" onClick={() => router.push('/admin/properties')}>
-          Cancel
-        </Button>
+      <div className="panel sticky bottom-4 flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-sm font-medium text-foreground">
+            {mode === 'create' ? 'Ready to publish this listing?' : 'Save your latest property changes'}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Content, pricing, media uploads, and visibility settings will all be saved together.
+          </p>
+        </div>
+        <div className="flex gap-3">
+          <Button type="button" variant="outline" onClick={() => router.push('/admin/properties')}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground hover:opacity-95">
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {mode === 'create' ? 'Creating...' : 'Saving...'}
+              </>
+            ) : mode === 'create' ? (
+              '+ Create Property'
+            ) : (
+              'Save Changes'
+            )}
+          </Button>
+        </div>
       </div>
     </form>
   );

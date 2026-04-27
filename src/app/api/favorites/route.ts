@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { Favorite, Property, PropertyImage, User } from '@/lib/db/index';
+import { ensureDatabase, Favorite, Property, PropertyImage, User } from '@/lib/db/index';
 
 export async function GET(request: NextRequest) {
   try {
+    await ensureDatabase();
+
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
@@ -35,6 +37,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    await ensureDatabase();
+
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
@@ -67,6 +71,8 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    await ensureDatabase();
+
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });

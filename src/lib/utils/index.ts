@@ -32,6 +32,10 @@ export function generateSlug(title: string): string {
     + '-' + Date.now().toString(36);
 }
 
+export function isUuid(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
 export function getPropertyTypeLabel(type: string): string {
   const labels: Record<string, string> = {
     apartment: 'Apartment',
@@ -56,12 +60,12 @@ export function getStatusLabel(status: string): string {
 
 export function getStatusColor(status: string): string {
   const colors: Record<string, string> = {
-    for_sale: 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/20',
-    for_rent: 'bg-sky-500/15 text-sky-300 border border-sky-500/20',
-    sold: 'bg-accent/15 text-red-200 border border-accent/30',
-    rented: 'bg-white/10 text-white/65 border border-white/10',
+    for_sale: 'border border-emerald-500/20 bg-emerald-500/10 text-emerald-700',
+    for_rent: 'border border-sky-500/20 bg-sky-500/10 text-sky-700',
+    sold: 'border border-primary/20 bg-primary/10 text-primary',
+    rented: 'border border-border bg-secondary/5 text-secondary',
   };
-  return colors[status] || 'bg-white/10 text-white/65 border border-white/10';
+  return colors[status] || 'border border-border bg-secondary/5 text-secondary';
 }
 
 export function getFurnishingLabel(furnishing: string): string {

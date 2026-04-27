@@ -14,7 +14,11 @@ export function PropertiesMobileFilter() {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Button variant="outline" onClick={() => setOpen(true)} className="h-[52px] w-full justify-center gap-2 text-[13px] uppercase tracking-[0.08em] sm:w-auto">
+      <Button
+        variant="outline"
+        onClick={() => setOpen(true)}
+        className="h-12 w-full justify-center gap-2 border-border bg-card px-5 text-[12px] uppercase tracking-[0.16em] sm:w-auto"
+      >
         <SlidersHorizontal className="w-4 h-4" />
         Filters & Sort
       </Button>
@@ -23,7 +27,7 @@ export function PropertiesMobileFilter() {
           <DialogHeader>
             <DialogTitle className="font-display text-2xl tracking-tight text-white">Filter Properties</DialogTitle>
           </DialogHeader>
-          <PropertyFilters onClose={() => setOpen(false)} />
+          <PropertyFilters variant="panel" onClose={() => setOpen(false)} />
         </DialogContent>
       </Dialog>
     </>

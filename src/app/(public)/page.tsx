@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { Diamond, Building2, TrendingUp, Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { formatSitePrice, getFeaturedSiteProperties } from '@/lib/site-properties';
+import { getFeaturedPublicProperties } from '@/lib/public-properties';
+import { formatFullPrice } from '@/lib/utils/index';
 
 const trustItems = [
   { icon: Diamond, label: 'Luxury Expertise' },
@@ -27,7 +28,7 @@ const services = [
 ];
 
 export default async function HomePage() {
-  const featured = getFeaturedSiteProperties(6);
+  const featured = await getFeaturedPublicProperties(6);
 
   return (
     <div>
@@ -113,7 +114,7 @@ export default async function HomePage() {
               <div key={property.id} className="group bg-card">
                 <div className="overflow-hidden">
                   <img
-                    src={property.images[0]}
+                    src={property.coverImage || property.images?.[0]?.url || '/lovable-assets/property-1.jpg'}
                     alt={property.title}
                     className="h-64 w-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
@@ -121,19 +122,19 @@ export default async function HomePage() {
                 <div className="p-6">
                   <div className="mb-2 flex items-center gap-2">
                     <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-                      {property.location}
+                      {property.district || property.city}
                     </span>
-                    {property.status === 'off-plan' && (
+                    {property.status === 'for_sale' && property.isFeatured && (
                       <span className="bg-accent/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-accent">
-                        Off-Plan
+                        Featured
                       </span>
                     )}
                   </div>
                   <h3 className="font-display mb-2 text-xl">{property.title}</h3>
-                  <p className="mb-3 text-lg font-semibold text-accent">{formatSitePrice(property.price, property.type)}</p>
+                  <p className="mb-3 text-lg font-semibold text-accent">{formatFullPrice(Number(property.price))}</p>
                   <p className="mb-4 line-clamp-2 text-sm text-muted-foreground">{property.description}</p>
                   <Button variant="cta" size="sm" asChild className="w-full rounded-none">
-                    <Link href={`/property/${property.id}`}>View Details</Link>
+                    <Link href={`/properties/${property.slug}`}>View Details</Link>
                   </Button>
                 </div>
               </div>

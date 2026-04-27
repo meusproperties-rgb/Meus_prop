@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { Op, WhereOptions } from 'sequelize';
+import { WhereOptions } from 'sequelize';
 import { z } from 'zod';
 import { authOptions } from '@/lib/auth';
-import { Property, PropertyImage, User, Favorite } from '@/lib/db/index';
+import { ensureDatabase, Property, PropertyImage, User, Favorite } from '@/lib/db/index';
 import { PropertyAttributes } from '@/lib/db/models/Property';
+import { isUuid } from '@/lib/utils';
 import { propertySchema } from '@/lib/validations/index';
 type Params = { params: { id: string } };
 
@@ -13,12 +14,16 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest, { params }: Params) {
   try {
+    await ensureDatabase();
+
     const { id } = params;
+    const { searchParams } = new URL(request.url);
+    const shouldIncrementView = searchParams.get('incrementView') !== 'false';
 
     // Find by UUID or slug
-    const where: WhereOptions<PropertyAttributes> = id.includes('-') && id.length > 30
+    const where: WhereOptions<PropertyAttributes> = isUuid(id)
       ? { id }
-      : { [Op.or]: [{ id }, { slug: id }] };
+      : { slug: id };
 
     const property = await Property.findOne({
       where,
@@ -41,8 +46,9 @@ export async function GET(request: NextRequest, { params }: Params) {
       return NextResponse.json({ success: false, error: 'Property not found' }, { status: 404 });
     }
 
-    // Increment view count
-    await property.increment('viewCount');
+    if (shouldIncrementView) {
+      await property.increment('viewCount');
+    }
 
     // Check if user has favorited
     const session = await getServerSession(authOptions);
@@ -66,6 +72,8 @@ export async function GET(request: NextRequest, { params }: Params) {
 
 export async function PUT(request: NextRequest, { params }: Params) {
   try {
+    await ensureDatabase();
+
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
@@ -107,6 +115,8 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
 export async function DELETE(request: NextRequest, { params }: Params) {
   try {
+    await ensureDatabase();
+
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });

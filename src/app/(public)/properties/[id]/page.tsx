@@ -1,16 +1,28 @@
-import { notFound } from 'next/navigation';
-import Link from 'next/link';
 import type { Metadata } from 'next';
-import { Bed, Bath, Maximize, LandPlot, Phone, MessageCircle, Calendar, ChevronLeft } from 'lucide-react';
-import { formatSitePrice, getSitePropertyById } from '@/lib/site-properties';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { Bath, Bed, Building2, ChevronLeft, MapPin, Maximize, ShieldCheck } from 'lucide-react';
+import { EnquiryForm } from '@/components/property/EnquiryForm';
+import { PropertyGallery } from '@/components/property/PropertyGallery';
+import { getPublicProperty } from '@/lib/public-properties';
+import {
+  formatArea,
+  formatFullPrice,
+  getPropertyTypeLabel,
+  getStatusLabel,
+  timeAgo,
+} from '@/lib/utils/index';
 
 interface PageProps {
   params: { id: string };
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const property = getSitePropertyById(params.id);
-  if (!property) return { title: 'Property Not Found' };
+  const property = await getPublicProperty(params.id, false);
+
+  if (!property) {
+    return { title: 'Property Not Found' };
+  }
 
   return {
     title: property.title,
@@ -18,112 +30,148 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     openGraph: {
       title: property.title,
       description: property.description.slice(0, 160),
-      images: property.images[0] ? [property.images[0]] : [],
+      images: property.coverImage ? [property.coverImage] : property.images?.[0]?.url ? [property.images[0].url] : [],
     },
   };
 }
 
-export default function PropertyDetailPage({ params }: PageProps) {
-  const property = getSitePropertyById(params.id);
-  if (!property) notFound();
+export default async function PropertyDetailPage({ params }: PageProps) {
+  const property = await getPublicProperty(params.id, true);
 
-  const specs = [
-    { icon: Bed, label: 'Bedrooms', value: property.bedrooms },
-    { icon: Bath, label: 'Bathrooms', value: property.bathrooms },
-    { icon: Maximize, label: 'Built-up Area', value: `${property.builtUpArea.toLocaleString()} sqft` },
-    ...(property.plotSize ? [{ icon: LandPlot, label: 'Plot Size', value: `${property.plotSize.toLocaleString()} sqft` }] : []),
+  if (!property) {
+    notFound();
+  }
+
+  const galleryImages =
+    property.images && property.images.length > 0
+      ? property.images
+      : property.coverImage
+        ? [{
+            id: `${property.id}-cover`,
+            url: property.coverImage,
+            publicId: null,
+            caption: property.title,
+            order: 0,
+          }]
+        : [];
+
+  const statItems = [
+    { icon: Bed, label: 'Bedrooms', value: property.bedrooms ?? '-' },
+    { icon: Bath, label: 'Bathrooms', value: property.bathrooms ?? '-' },
+    { icon: Maximize, label: 'Area', value: formatArea(Number(property.area)) },
+    { icon: Building2, label: 'Type', value: getPropertyTypeLabel(property.type) },
   ];
 
   return (
-    <div className="pt-20">
-      <section className="relative h-[40vh] min-h-[280px] sm:h-[50vh] lg:h-[60vh]">
-        <img src={property.images[0]} alt={property.title} className="h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-primary/30" />
-        <Link
-          href="/listings"
-          className="absolute left-6 top-6 z-10 flex items-center gap-2 text-primary-foreground/80 transition-colors hover:text-primary-foreground"
-        >
-          <ChevronLeft size={20} />
-          <span className="text-sm uppercase tracking-widest">Back</span>
-        </Link>
+    <div className="bg-primary pb-20 pt-20 text-white">
+      <section className="border-b border-white/10 py-8">
+        <div className="container mx-auto px-6">
+          <Link
+            href="/listings"
+            className="inline-flex items-center gap-2 text-sm uppercase tracking-[0.12em] text-[#8f939c] transition-colors hover:text-white"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Back to Listings
+          </Link>
+        </div>
       </section>
 
-      <section className="py-16">
-        <div className="container mx-auto grid gap-12 px-6 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            <div>
-              <div className="mb-3 flex items-center gap-3">
-                <span className="text-xs uppercase tracking-widest text-muted-foreground">{property.location}</span>
-                <span className={`px-2 py-0.5 text-[10px] uppercase tracking-widest ${
-                  property.status === 'off-plan' ? 'bg-accent/10 text-accent' : 'bg-muted text-muted-foreground'
-                }`}>
-                  {property.status === 'off-plan' ? 'Off-Plan' : 'Ready'}
+      <section className="container mx-auto px-6 py-10">
+        <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_360px]">
+          <div className="space-y-8">
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-[#8f939c]">
+                  {property.district || property.city}
                 </span>
+                <span className="rounded-full bg-[#50151c] px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-[#d12d3a]">
+                  {getStatusLabel(property.status)}
+                </span>
+                {property.isFeatured ? (
+                  <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-amber-300">
+                    Featured
+                  </span>
+                ) : null}
               </div>
-              <h1 className="font-display mb-3 text-3xl md:text-4xl">{property.title}</h1>
-              <p className="font-body mb-8 text-2xl font-semibold text-accent">{formatSitePrice(property.price, property.type)}</p>
 
-              <div className="mb-12 grid grid-cols-1 gap-4 bg-secondary p-6 sm:grid-cols-2 md:grid-cols-4">
-                {specs.map((spec) => (
-                  <div key={spec.label} className="flex items-center gap-3">
-                    <spec.icon className="h-5 w-5 text-accent" />
-                    <div>
-                      <p className="text-xs uppercase tracking-widest text-muted-foreground">{spec.label}</p>
-                      <p className="font-semibold">{spec.value}</p>
+              <h1 className="font-display text-4xl leading-tight md:text-5xl">{property.title}</h1>
+              <p className="text-2xl font-semibold text-[#d12d3a]">{formatFullPrice(Number(property.price))}</p>
+              <div className="flex flex-wrap items-center gap-4 text-sm text-[#8f939c]">
+                <span className="inline-flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  {property.address}, {property.city}
+                </span>
+                <span>Listed {timeAgo(property.createdAt)}</span>
+                <span>{property.viewCount} views</span>
+              </div>
+            </div>
+
+            <PropertyGallery images={galleryImages} title={property.title} />
+
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {statItems.map((item) => (
+                <div key={item.label} className="border border-white/10 bg-[#111111] p-5">
+                  <item.icon className="h-5 w-5 text-[#d12d3a]" />
+                  <p className="mt-4 text-xs uppercase tracking-[0.14em] text-[#8f939c]">{item.label}</p>
+                  <p className="mt-2 text-lg font-semibold text-white">{item.value}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="border border-white/10 bg-[#111111] p-8">
+              <h2 className="font-display text-2xl">Description</h2>
+              <p className="mt-4 whitespace-pre-wrap leading-8 text-[#a3a5aa]">{property.description}</p>
+            </div>
+
+            {property.amenities?.length ? (
+              <div className="border border-white/10 bg-[#111111] p-8">
+                <h2 className="font-display text-2xl">Amenities</h2>
+                <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                  {property.amenities.map((amenity) => (
+                    <div key={amenity} className="flex items-center gap-3 text-sm text-[#d7d7d9]">
+                      <div className="h-2 w-2 rounded-full bg-[#d12d3a]" />
+                      {amenity}
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
+            ) : null}
 
-              <h2 className="font-display mb-4 text-2xl">Description</h2>
-              <p className="mb-12 leading-relaxed text-muted-foreground">{property.description}</p>
-
-              <h2 className="font-display mb-4 text-2xl">Key Features</h2>
-              <div className="mb-12 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
-                {property.features.map((feature) => (
-                  <div key={feature} className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <div className="h-1.5 w-1.5 rounded-full bg-accent" />
-                    {feature}
-                  </div>
-                ))}
+            {property.features?.length ? (
+              <div className="border border-white/10 bg-[#111111] p-8">
+                <h2 className="font-display text-2xl">Key Features</h2>
+                <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                  {property.features.map((feature) => (
+                    <div key={feature} className="flex items-center gap-3 text-sm text-[#d7d7d9]">
+                      <ShieldCheck className="h-4 w-4 text-[#d12d3a]" />
+                      {feature}
+                    </div>
+                  ))}
+                </div>
               </div>
-
-              {(property.roi || property.rentalYield) && (
-                <>
-                  <h2 className="font-display mb-4 text-2xl">Investment Highlights</h2>
-                  <div className="grid grid-cols-1 gap-6 bg-secondary p-6 sm:grid-cols-2">
-                    {property.roi && (
-                      <div>
-                        <p className="mb-1 text-xs uppercase tracking-widest text-muted-foreground">Estimated ROI</p>
-                        <p className="font-display text-2xl font-bold text-accent">{property.roi}</p>
-                      </div>
-                    )}
-                    {property.rentalYield && (
-                      <div>
-                        <p className="mb-1 text-xs uppercase tracking-widest text-muted-foreground">Rental Yield</p>
-                        <p className="font-display text-2xl font-bold text-accent">{property.rentalYield}</p>
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
+            ) : null}
           </div>
 
-          <div className="lg:col-span-1">
-            <div className="space-y-4 bg-primary p-6 text-primary-foreground sm:p-8 lg:sticky lg:top-28">
-              <h3 className="mb-6 text-xl font-semibold font-display">Interested in this property?</h3>
-              <button className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-accent px-8 text-sm font-medium tracking-wide text-accent-foreground transition-colors hover:bg-accent/90">
-                <Calendar size={18} /> Book a Viewing
-              </button>
-              <button className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-md border-2 border-primary-foreground bg-transparent px-8 text-sm font-medium tracking-wide text-primary-foreground transition-colors hover:bg-primary-foreground hover:text-primary">
-                <MessageCircle size={18} /> WhatsApp
-              </button>
-              <button className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-md border-2 border-primary-foreground bg-transparent px-8 text-sm font-medium tracking-wide text-primary-foreground transition-colors hover:bg-primary-foreground hover:text-primary">
-                <Phone size={18} /> Call Now
-              </button>
+          <aside className="space-y-6 xl:sticky xl:top-28 xl:self-start">
+            <div className="border border-white/10 bg-[#111111] p-8">
+              <EnquiryForm
+                propertyId={property.id}
+                propertyTitle={property.title}
+                ownerPhone={property.owner?.phone}
+              />
             </div>
-          </div>
+
+            {property.owner ? (
+              <div className="border border-white/10 bg-[#111111] p-8">
+                <p className="text-xs uppercase tracking-[0.14em] text-[#8f939c]">Listed By</p>
+                <h3 className="mt-3 font-display text-2xl">{property.owner.name}</h3>
+                <p className="mt-2 text-sm text-[#a3a5aa]">{property.owner.email}</p>
+                {property.owner.phone ? (
+                  <p className="mt-1 text-sm text-[#a3a5aa]">{property.owner.phone}</p>
+                ) : null}
+              </div>
+            ) : null}
+          </aside>
         </div>
       </section>
     </div>

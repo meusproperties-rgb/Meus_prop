@@ -3,13 +3,15 @@ import { getServerSession } from 'next-auth';
 import { Op, WhereOptions, Order } from 'sequelize';
 import { z } from 'zod';
 import { authOptions } from '@/lib/auth';
-import { Property, PropertyImage, User, Favorite } from '@/lib/db/index';
+import { ensureDatabase, Property, PropertyImage, User, Favorite } from '@/lib/db/index';
 import { propertySchema, propertyFilterSchema } from '@/lib/validations/index';
 import { generateSlug } from '@/lib/utils/index';
 import { PropertyAttributes } from '@/lib/db/models/Property';
 
 export async function GET(request: NextRequest) {
   try {
+    await ensureDatabase();
+
     const { searchParams } = new URL(request.url);
     const params = Object.fromEntries(searchParams.entries());
 
@@ -128,6 +130,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    await ensureDatabase();
+
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });

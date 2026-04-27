@@ -5,8 +5,6 @@ import Image from 'next/image';
 import { X, ChevronLeft, ChevronRight, Grid3X3 } from 'lucide-react';
 import type { PropertyImage } from '@/types/index';
 
-const PLACEHOLDER = 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=80';
-
 interface PropertyGalleryProps {
   images: PropertyImage[];
   title: string;
@@ -14,15 +12,25 @@ interface PropertyGalleryProps {
 
 export function PropertyGallery({ images, title }: PropertyGalleryProps) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const [showAll, setShowAll] = useState(false);
 
-  const displayImages = images.length > 0 ? images : [{ id: '0', url: PLACEHOLDER, publicId: null, caption: null, order: 0 }];
+  const displayImages = images;
   const gridImages = displayImages.slice(0, 5);
 
   const openLightbox = (index: number) => setLightboxIndex(index);
   const closeLightbox = () => setLightboxIndex(null);
   const prev = () => setLightboxIndex((i) => (i !== null ? (i - 1 + displayImages.length) % displayImages.length : 0));
   const next = () => setLightboxIndex((i) => (i !== null ? (i + 1) % displayImages.length : 0));
+
+  if (displayImages.length === 0) {
+    return (
+      <div className="flex h-[420px] items-center justify-center border border-white/10 bg-[#111111] text-center">
+        <div className="space-y-3 px-6">
+          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#8f939c]">No property images</p>
+          <p className="text-sm text-[#a3a5aa]">This property currently has no images available from the API.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
