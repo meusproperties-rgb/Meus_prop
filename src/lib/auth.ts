@@ -8,6 +8,7 @@ const TEMP_ADMIN_ID = 'temp-admin';
 const TEMP_ADMIN_EMAIL = process.env.ADMIN_LOGIN_EMAIL || 'admin@meus.ae';
 const TEMP_ADMIN_PASSWORD = process.env.ADMIN_LOGIN_PASSWORD || 'Admin@12345';
 const TEMP_ADMIN_NAME = process.env.ADMIN_LOGIN_NAME || 'Admin User';
+const AUTH_SECRET = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET;
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -144,7 +145,7 @@ export const authOptions: NextAuthOptions = {
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: AUTH_SECRET,
   debug: process.env.NODE_ENV === 'development',
 };
 

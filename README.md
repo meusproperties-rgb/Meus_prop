@@ -43,6 +43,13 @@ NEXT_PUBLIC_APP_URL="http://localhost:3000"
 NEXT_PUBLIC_APP_NAME="Meus Real Estate"
 ```
 
+In production, `NEXTAUTH_SECRET` must be set in your hosting provider's environment variables.
+You can also set `AUTH_SECRET`; the app accepts either name. Generate a strong value with:
+
+```bash
+openssl rand -base64 32
+```
+
 For hosted PostgreSQL like Neon, Supabase, or Render, switch to your hosted connection string and usually set:
 
 ```env
