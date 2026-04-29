@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   description: 'Browse luxury properties for sale and rent in Dubai. Villas, penthouses, apartments and more.',
 };
 
+export const dynamic = 'force-dynamic';
+
 interface PropertiesPageProps {
   searchParams: Record<string, string | string[] | undefined>;
 }
