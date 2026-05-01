@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
+import { Logo } from './Logo';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -20,9 +21,7 @@ export function Navbar() {
     <nav className="fixed left-0 right-0 top-0 z-50 bg-primary/95 backdrop-blur-sm">
       <div className="container mx-auto px-6">
         <div className="flex h-20 items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <img src="/lovable-assets/logo-nav.png" alt="Meus Real Estate" className="h-12 w-auto" />
-          </Link>
+          <Logo compact />
 
           <div className="hidden items-center gap-10 md:flex">
             {navLinks.map((link) => (

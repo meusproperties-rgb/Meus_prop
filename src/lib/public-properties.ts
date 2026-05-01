@@ -1,4 +1,4 @@
-import { Op, type Order, type WhereOptions } from 'sequelize';
+import { Op, type Order, type OrderItem, type WhereOptions } from 'sequelize';
 import type { PaginatedResponse, Property } from '@/types/index';
 import { ensureDatabase, Property as PropertyModel, PropertyImage, User } from '@/lib/db/index';
 import { isUuid } from '@/lib/utils';
@@ -96,6 +96,7 @@ export async function getPublicProperties(
 
     const { page, limit, sortBy, where } = buildPublicWhereClause(searchParams);
     const offset = (page - 1) * limit;
+    const selectedOrder = (orderMap[sortBy] || orderMap.newest) as OrderItem[];
 
     const { count, rows } = await PropertyModel.findAndCountAll({
       where,
@@ -111,7 +112,10 @@ export async function getPublicProperties(
           attributes: ['id', 'name', 'email', 'phone', 'avatar'],
         },
       ],
-      order: orderMap[sortBy] || orderMap.newest,
+      order: [
+        ...selectedOrder,
+        [{ model: PropertyImage, as: 'images' }, 'order', 'ASC'],
+      ],
       limit,
       offset,
       distinct: true,
@@ -161,6 +165,7 @@ export async function getPublicProperty(id: string, incrementView = true): Promi
           attributes: ['id', 'name', 'email', 'phone', 'avatar'],
         },
       ],
+      order: [[{ model: PropertyImage, as: 'images' }, 'order', 'ASC']],
     });
 
     if (!property) {

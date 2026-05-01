@@ -13,8 +13,9 @@ interface PropertyGalleryProps {
 export function PropertyGallery({ images, title }: PropertyGalleryProps) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
-  const displayImages = images;
+  const displayImages = [...images].sort((a, b) => a.order - b.order);
   const gridImages = displayImages.slice(0, 5);
+  const isSingleImage = displayImages.length === 1;
 
   const openLightbox = (index: number) => setLightboxIndex(index);
   const closeLightbox = () => setLightboxIndex(null);
@@ -34,10 +35,22 @@ export function PropertyGallery({ images, title }: PropertyGalleryProps) {
 
   return (
     <>
-      {/* Grid Gallery */}
-      <div className="gallery-grid cursor-pointer overflow-hidden" onClick={() => openLightbox(0)}>
+      <div
+        className={
+          isSingleImage
+            ? 'relative h-[320px] cursor-pointer overflow-hidden border border-white/10 bg-[#111111] sm:h-[460px] lg:h-[560px]'
+            : 'grid cursor-pointer grid-cols-2 gap-2 overflow-hidden sm:h-[460px] lg:h-[560px] lg:grid-cols-4 lg:grid-rows-2'
+        }
+        onClick={() => openLightbox(0)}
+      >
         {gridImages.map((img, index) => (
-          <div key={img.id} className="relative overflow-hidden group" onClick={(e) => { e.stopPropagation(); openLightbox(index); }}>
+          <div
+            key={img.id}
+            className={`group relative min-h-[160px] overflow-hidden bg-[#111111] ${
+              !isSingleImage && index === 0 ? 'col-span-2 row-span-2 min-h-[320px]' : ''
+            }`}
+            onClick={(e) => { e.stopPropagation(); openLightbox(index); }}
+          >
             <Image
               src={img.url}
               alt={img.caption || `${title} - Image ${index + 1}`}

@@ -162,7 +162,9 @@ export function PropertyForm({ property, mode }: PropertyFormProps) {
           body: JSON.stringify({ images: base64Images.map((base64) => ({ base64 })) }),
         });
         const json = await response.json();
-        if (!json.success) console.error('Image upload failed:', json.error);
+        if (!response.ok || !json.success) {
+          throw new Error(json.error || 'Image upload failed');
+        }
       }
 
       toast({

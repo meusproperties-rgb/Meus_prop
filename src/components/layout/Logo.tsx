@@ -2,15 +2,16 @@ import Link from 'next/link';
 
 interface LogoProps {
   compact?: boolean;
+  className?: string;
 }
 
-export function Logo({ compact = false }: LogoProps) {
+export function Logo({ compact = false, className }: LogoProps) {
   return (
-    <Link href="/" className="flex items-center gap-3">
+    <Link href="/" className="flex items-center">
       <img
-        src={compact ? '/lovable-assets/logo-nav.png' : '/lovable-assets/logo-nav.png'}
+        src="/lovable-assets/logo-nav.png"
         alt="Meus Real Estate"
-        className="h-12 w-auto"
+        className={className || (compact ? 'h-10 w-auto sm:h-12' : 'h-14 w-auto sm:h-16')}
       />
     </Link>
   );

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { Logo } from './Logo';
 
 export function Footer() {
   return (
@@ -9,7 +10,9 @@ export function Footer() {
         <div className="mb-12 h-0.5 w-16 bg-accent" />
         <div className="mb-16 grid grid-cols-1 gap-12 md:grid-cols-2 xl:grid-cols-4">
           <div>
-            <img src="/lovable-assets/logo-vertical-color.png" alt="Meus Real Estate" className="mb-4 h-20 w-auto" />
+            <div className="mb-5 max-w-[260px]">
+              <Logo className="h-auto w-full" />
+            </div>
             <p className="text-sm leading-relaxed text-primary-foreground/60">
               Dubai&apos;s strategic luxury &amp; off-plan property advisors. Delivering premium real estate solutions for discerning investors.
             </p>
