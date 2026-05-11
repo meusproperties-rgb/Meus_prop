@@ -7,7 +7,7 @@ interface LogoProps {
 
 export function Logo({ compact = false, className }: LogoProps) {
   return (
-    <Link href="/" className="flex items-center">
+    <Link href="/" className="flex items-center ">
       <img
         src="/lovable-assets/logo-nav.png"
         alt="Meus Real Estate"

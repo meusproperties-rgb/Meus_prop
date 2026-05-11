@@ -6,6 +6,39 @@
 
 @layer base {
   :root {
+    --background: 0 0% 99%;
+    --foreground: 0 0% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+    --primary: 0 0% 6%;
+    --primary-foreground: 0 0% 95%;
+    --secondary: 0 0% 94%;
+    --secondary-foreground: 0 0% 12%;
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 42%;
+    --accent: 355 65% 45%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 86%;
+    --input: 0 0% 86%;
+    --ring: 355 65% 45%;
+    --radius: 0.25rem;
+    --font-display: 'Manrope', sans-serif;
+    --font-body: 'Manrope', sans-serif;
+    --sidebar-background: 0 0% 6%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 0 0% 95%;
+    --sidebar-primary-foreground: 0 0% 6%;
+    --sidebar-accent: 0 0% 14%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 0 0% 18%;
+    --sidebar-ring: 355 65% 45%;
+  }
+
+  .dark {
     --background: 0 0% 8%;
     --foreground: 0 0% 95%;
     --card: 0 0% 11%;
@@ -25,9 +58,6 @@
     --border: 0 0% 18%;
     --input: 0 0% 18%;
     --ring: 355 65% 45%;
-    --radius: 0.25rem;
-    --font-display: 'Manrope', sans-serif;
-    --font-body: 'Manrope', sans-serif;
     --sidebar-background: 0 0% 6%;
     --sidebar-foreground: 0 0% 95%;
     --sidebar-primary: 0 0% 95%;

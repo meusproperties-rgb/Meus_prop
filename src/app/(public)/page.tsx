@@ -99,7 +99,7 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-
+{/* featured properties */}
       <section className="bg-secondary py-20 md:py-28">
         <div className="container mx-auto px-6">
           <div className="mb-16 text-center">
@@ -142,31 +142,31 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-
-      <section className="bg-primary py-20 text-primary-foreground md:py-28">
+{/* {services} */}
+      <section className="bg-background py-20 text-foreground md:py-28">
         <div className="container mx-auto px-6">
           <div className="mb-16 text-center">
             <h2 className="font-display mb-4 text-3xl md:text-4xl">Services</h2>
-            <p className="mx-auto max-w-xl text-primary-foreground/60">
+            <p className="mx-auto max-w-xl text-muted-foreground">
               Comprehensive real estate solutions tailored for the UAE market.
             </p>
           </div>
 
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
             {services.map((service) => (
-              <div key={service.title} className="border border-primary-foreground/10 p-8 transition-colors hover:border-accent/50">
+              <div key={service.title} className="border border-border bg-card p-8 transition-colors hover:border-accent/50">
                 <h3 className="font-display mb-3 text-xl">{service.title}</h3>
-                <p className="text-sm leading-relaxed text-primary-foreground/60">{service.desc}</p>
+                <p className="text-sm leading-relaxed text-muted-foreground">{service.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
-
-      <section className="py-20 md:py-28">
+{/* why investors choose us */}
+      <section className=" bg-secondary py-20 md:py-28">
         <div className="container mx-auto max-w-3xl px-6 text-center">
           <h2 className="font-display mb-8 text-3xl md:text-4xl">Why Investors Choose Us</h2>
-          <p className="mb-14 leading-relaxed text-muted-foreground">
+          <p className="mb-14 leading-relaxed text-foreground ">
             At MEUS, we believe real estate is more than a transaction - it is a long-term decision. We are committed to
             professionalism, transparency, and a client-centric approach.
           </p>

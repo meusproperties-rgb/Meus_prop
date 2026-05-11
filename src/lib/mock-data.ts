@@ -300,6 +300,7 @@ export function getMockProperties(searchParams: Record<string, string | string[]
   const search = typeof searchParams.search === 'string' ? searchParams.search.toLowerCase() : '';
   const type = typeof searchParams.type === 'string' ? searchParams.type : '';
   const status = typeof searchParams.status === 'string' ? searchParams.status : '';
+  const readiness = typeof searchParams.readiness === 'string' ? searchParams.readiness : '';
   const district = typeof searchParams.district === 'string' ? searchParams.district : '';
   const minPrice = typeof searchParams.minPrice === 'string' ? Number(searchParams.minPrice) : undefined;
   const maxPrice = typeof searchParams.maxPrice === 'string' ? Number(searchParams.maxPrice) : undefined;
@@ -319,6 +320,8 @@ export function getMockProperties(searchParams: Record<string, string | string[]
 
   if (type) items = items.filter((property) => property.type === type);
   if (status) items = items.filter((property) => property.status === status);
+  if (readiness === 'off-plan') items = items.filter((property) => property.features.includes('Off-Plan'));
+  if (readiness === 'ready') items = items.filter((property) => !property.features.includes('Off-Plan'));
   if (district) items = items.filter((property) => property.district === district);
   if (!Number.isNaN(minPrice) && minPrice !== undefined) items = items.filter((property) => property.price >= minPrice);
   if (!Number.isNaN(maxPrice) && maxPrice !== undefined) items = items.filter((property) => property.price <= maxPrice);

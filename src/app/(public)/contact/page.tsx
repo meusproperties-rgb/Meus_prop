@@ -45,9 +45,9 @@ export default function ContactPage() {
             </div>
             <div className="space-y-6">
               {[
-                { icon: MapPin, label: 'Visit Us', value: 'Downtown Dubai, UAE' },
-                { icon: Phone, label: 'Call Us', value: '+971 4 XXX XXXX' },
-                { icon: Mail, label: 'Email Us', value: 'info@luxedubai.ae' },
+                { icon: MapPin, label: 'Visit Us', value: 'UAE, business bay, Marasi drive St, bayview tower, 13th floor, office 1309D' },
+                { icon: Phone, label: 'Call Us', value: '+971 50 900 9028' },
+                { icon: Mail, label: 'Email Us', value: 'info@meus.ae' },
               ].map((item) => (
                 <div key={item.label} className="flex items-start gap-4">
                   <item.icon className="mt-1 h-5 w-5 text-accent" />

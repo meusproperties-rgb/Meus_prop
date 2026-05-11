@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Search, SlidersHorizontal, X } from 'lucide-react';
+import { ChevronDown, Search, SlidersHorizontal, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -30,6 +30,12 @@ const PROPERTY_STATUSES = [
   { value: 'for_rent', label: 'Rent' },
 ];
 
+const READINESS_STATUSES = [
+  { value: 'all', label: 'All Status' },
+  { value: 'off-plan', label: 'Off-Plan' },
+  { value: 'ready', label: 'Ready' },
+];
+
 const BEDROOM_OPTIONS = [
   { value: 'all', label: 'Any Beds' },
   { value: '1', label: '1+ Bed' },
@@ -52,6 +58,7 @@ interface FilterValues {
   search: string;
   type: string;
   status: string;
+  readiness: string;
   district: string;
   minPrice: string;
   maxPrice: string;
@@ -63,6 +70,163 @@ interface PropertyFiltersProps {
   className?: string;
   onClose?: () => void;
   variant?: 'toolbar' | 'panel';
+}
+
+interface StatusDropdownProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+
+interface ToolbarDropdownOption {
+  value: string;
+  label: string;
+}
+
+interface ToolbarDropdownProps {
+  value: string;
+  options: ToolbarDropdownOption[];
+  className?: string;
+  menuClassName?: string;
+  onChange: (value: string) => void;
+}
+
+function ToolbarDropdown({
+  value,
+  options,
+  className,
+  menuClassName,
+  onChange,
+}: ToolbarDropdownProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const selectedOption = options.find((option) => option.value === value) || options[0];
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      if (!dropdownRef.current?.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', closeOnOutsideClick);
+    return () => document.removeEventListener('mousedown', closeOnOutsideClick);
+  }, [isOpen]);
+
+  return (
+    <div ref={dropdownRef} className={cn('relative w-full sm:w-auto', className)}>
+      <button
+        type="button"
+        onClick={() => setIsOpen((current) => !current)}
+        className="flex h-12 w-full items-center justify-between gap-4 border border-border bg-card px-4 text-left text-sm font-normal text-foreground outline-none transition-colors hover:border-accent/50 focus:border-accent/50"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+      >
+        <span className="truncate">{selectedOption.label}</span>
+        <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+      </button>
+
+      {isOpen ? (
+        <div
+          className={cn(
+            'absolute left-0 top-full z-50 max-h-72 w-full overflow-y-auto border-x border-b border-border bg-card py-0 text-foreground shadow-sm',
+            menuClassName
+          )}
+          role="listbox"
+        >
+          {options.map((option) => {
+            const isSelected = selectedOption.value === option.value;
+
+            return (
+              <button
+                key={option.value}
+                type="button"
+                role="option"
+                aria-selected={isSelected}
+                onClick={() => {
+                  setIsOpen(false);
+                  onChange(option.value);
+                }}
+                className={cn(
+                  'block h-[34px] w-full truncate px-4 text-left text-sm leading-[34px] text-foreground outline-none transition-colors hover:bg-secondary',
+                  isSelected && 'bg-secondary'
+                )}
+              >
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function StatusDropdown({ value, onChange }: StatusDropdownProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const selectedValue = value || 'all';
+  const selectedLabel =
+    READINESS_STATUSES.find((status) => status.value === selectedValue)?.label || 'All Status';
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      if (!dropdownRef.current?.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', closeOnOutsideClick);
+    return () => document.removeEventListener('mousedown', closeOnOutsideClick);
+  }, [isOpen]);
+
+  return (
+    <div ref={dropdownRef} className="relative w-full sm:w-auto">
+      <button
+        type="button"
+        onClick={() => setIsOpen((current) => !current)}
+        className="flex h-12 w-full min-w-[180px] items-center justify-between gap-4 border border-border bg-card px-4 text-left text-sm font-normal text-foreground outline-none transition-colors hover:border-accent/50 focus:border-accent/50 sm:w-[180px]"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+      >
+        <span className="whitespace-nowrap">{selectedLabel}</span>
+        <ChevronDown className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+      </button>
+
+      {isOpen ? (
+        <div
+          className="absolute left-0 top-full z-50 w-full min-w-[180px] border-x border-b border-border bg-card py-0 text-foreground shadow-sm sm:w-[180px]"
+          role="listbox"
+        >
+          {READINESS_STATUSES.map((status) => {
+            const isSelected = selectedValue === status.value;
+
+            return (
+              <button
+                key={status.value}
+                type="button"
+                role="option"
+                aria-selected={isSelected}
+                onClick={() => {
+                  setIsOpen(false);
+                  onChange(status.value === 'all' ? '' : status.value);
+                }}
+                className={cn(
+                  'block h-[34px] w-full whitespace-nowrap px-4 text-left text-sm leading-[34px] text-foreground outline-none transition-colors hover:bg-secondary',
+                  isSelected && 'bg-secondary'
+                )}
+              >
+                {status.label}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 export function PropertyFilters({
@@ -77,7 +241,8 @@ export function PropertyFilters({
   const [filters, setFilters] = useState<FilterValues>({
     search: searchParams.get('search') || '',
     type: searchParams.get('type') || '',
-    status: searchParams.get('status') || '',
+    status: searchParams.get('status') || 'for_sale',
+    readiness: searchParams.get('readiness') || '',
     district: searchParams.get('district') || '',
     minPrice: searchParams.get('minPrice') || '',
     maxPrice: searchParams.get('maxPrice') || '',
@@ -87,30 +252,45 @@ export function PropertyFilters({
 
   const isToolbar = variant === 'toolbar';
 
-  const applyFilters = () => {
+  const pushFilters = (nextFilters: FilterValues) => {
     const params = new URLSearchParams();
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value) {
+    Object.entries(nextFilters).forEach(([key, value]) => {
+      if (value && !(key === 'sortBy' && value === 'newest')) {
         params.set(key, value);
       }
     });
     params.set('page', '1');
     router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const applyFilters = () => {
+    pushFilters(filters);
     onClose?.();
+  };
+
+  const updateToolbarFilter = (key: keyof FilterValues, value: string) => {
+    const nextFilters = {
+      ...filters,
+      [key]: value,
+    };
+
+    setFilters(nextFilters);
+    window.setTimeout(() => pushFilters(nextFilters), 0);
   };
 
   const clearFilters = () => {
     setFilters({
       search: '',
       type: '',
-      status: '',
+      status: 'for_sale',
+      readiness: '',
       district: '',
       minPrice: '',
       maxPrice: '',
       minBedrooms: '',
       sortBy: 'newest',
     });
-    router.push(pathname);
+    router.push(`${pathname}?status=for_sale&page=1`);
     onClose?.();
   };
 
@@ -118,24 +298,26 @@ export function PropertyFilters({
 
   const statusButtonClass = (value: string) =>
     cn(
-      'flex-1 px-6 py-3 text-sm uppercase tracking-[0.16em] transition-colors sm:flex-none',
+      'flex-1 px-7 py-3 text-sm uppercase tracking-[0.12em] transition-colors sm:flex-none',
       filters.status === value
-        ? 'bg-primary text-primary-foreground'
+        ? 'bg-secondary text-foreground'
         : 'text-muted-foreground hover:text-foreground'
     );
 
-  const toolbarFieldClass =
-    'h-12 border-border bg-card/70 text-sm text-foreground shadow-none placeholder:text-muted-foreground';
+  const districtOptions = [
+    { value: 'all', label: 'All' },
+    ...DUBAI_DISTRICTS.map((district) => ({ value: district, label: district })),
+  ];
 
   if (isToolbar) {
     return (
       <div className={cn('space-y-5', className)}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 text-sm uppercase tracking-[0.16em] text-muted-foreground">
+            {/* <div className="flex items-center gap-2 text-sm uppercase tracking-[0.16em] text-muted-foreground">
               <SlidersHorizontal className="h-4 w-4 text-accent" />
               Search Filters
-            </div>
+            </div> */}
             {hasActiveFilters ? (
               <span className="border border-accent/20 bg-accent/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-accent">
                 Active
@@ -143,7 +325,7 @@ export function PropertyFilters({
             ) : null}
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* <div className="flex items-center gap-3">
             {hasActiveFilters ? (
               <button
                 type="button"
@@ -162,21 +344,16 @@ export function PropertyFilters({
             >
               Apply Filters
             </Button>
-          </div>
+          </div> */}
         </div>
 
-        <div className="flex w-full flex-col gap-3 lg:flex-row lg:items-stretch">
+        <div className="flex w-full flex-col gap-5 lg:flex-row lg:items-stretch">
           <div className="flex w-full border border-border bg-card lg:w-auto">
             {PROPERTY_STATUSES.map((status) => (
               <button
                 key={status.value}
                 type="button"
-                onClick={() =>
-                  setFilters((previous) => ({
-                    ...previous,
-                    status: previous.status === status.value ? '' : status.value,
-                  }))
-                }
+                onClick={() => updateToolbarFilter('status', status.value)}
                 className={statusButtonClass(status.value)}
               >
                 {status.label}
@@ -184,113 +361,28 @@ export function PropertyFilters({
             ))}
           </div>
 
-          <div className="grid flex-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
-            <Select
+          <div className="grid flex-1 gap-5 md:grid-cols-3 xl:flex xl:flex-none">
+            <ToolbarDropdown
               value={filters.district || 'all'}
-              onValueChange={(value) =>
-                setFilters((previous) => ({ ...previous, district: value === 'all' ? '' : value }))
-              }
-            >
-              <SelectTrigger className={toolbarFieldClass}>
-                <SelectValue placeholder="All Locations" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Locations</SelectItem>
-                {DUBAI_DISTRICTS.map((district) => (
-                  <SelectItem key={district} value={district}>
-                    {district}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              options={districtOptions}
+              className="xl:w-64"
+              menuClassName="xl:w-64"
+              onChange={(value) => updateToolbarFilter('district', value === 'all' ? '' : value)}
+            />
 
-            <Select
+            <ToolbarDropdown
               value={filters.minBedrooms || 'all'}
-              onValueChange={(value) =>
-                setFilters((previous) => ({ ...previous, minBedrooms: value === 'all' ? '' : value }))
-              }
-            >
-              <SelectTrigger className={toolbarFieldClass}>
-                <SelectValue placeholder="Any Beds" />
-              </SelectTrigger>
-              <SelectContent>
-                {BEDROOM_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              options={BEDROOM_OPTIONS}
+              className="xl:w-32"
+              menuClassName="xl:w-32"
+              onChange={(value) => updateToolbarFilter('minBedrooms', value === 'all' ? '' : value)}
+            />
 
-            <Select
-              value={filters.type || 'all'}
-              onValueChange={(value) =>
-                setFilters((previous) => ({ ...previous, type: value === 'all' ? '' : value }))
-              }
-            >
-              <SelectTrigger className={toolbarFieldClass}>
-                <SelectValue placeholder="All Types" />
-              </SelectTrigger>
-              <SelectContent>
-                {PROPERTY_TYPES.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={filters.sortBy}
-              onValueChange={(value) => setFilters((previous) => ({ ...previous, sortBy: value }))}
-            >
-              <SelectTrigger className={toolbarFieldClass}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {SORT_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,1.4fr)_repeat(2,minmax(0,1fr))]">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search title, district, address..."
-              className={cn(toolbarFieldClass, 'pl-10')}
-              value={filters.search}
-              onChange={(event) =>
-                setFilters((previous) => ({ ...previous, search: event.target.value }))
-              }
-              onKeyDown={(event) => event.key === 'Enter' && applyFilters()}
+            <StatusDropdown
+              value={filters.readiness}
+              onChange={(value) => updateToolbarFilter('readiness', value)}
             />
           </div>
-
-          <Input
-            placeholder="Min price"
-            type="number"
-            className={toolbarFieldClass}
-            value={filters.minPrice}
-            onChange={(event) =>
-              setFilters((previous) => ({ ...previous, minPrice: event.target.value }))
-            }
-          />
-
-          <Input
-            placeholder="Max price"
-            type="number"
-            className={toolbarFieldClass}
-            value={filters.maxPrice}
-            onChange={(event) =>
-              setFilters((previous) => ({ ...previous, maxPrice: event.target.value }))
-            }
-          />
         </div>
       </div>
     );
@@ -345,7 +437,7 @@ export function PropertyFilters({
               onClick={() =>
                 setFilters((previous) => ({
                   ...previous,
-                  status: previous.status === status.value ? '' : status.value,
+                  status: status.value,
                 }))
               }
               className={cn(

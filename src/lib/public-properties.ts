@@ -42,6 +42,12 @@ function buildPublicWhereClause(
 
   if (parsed.type) where.type = parsed.type;
   if (parsed.status) where.status = parsed.status;
+  if (normalizedParams.readiness === 'off-plan') {
+    where.features = { [Op.contains]: ['Off-Plan'] };
+  }
+  if (normalizedParams.readiness === 'ready') {
+    where.features = { [Op.not]: { [Op.contains]: ['Off-Plan'] } };
+  }
   if (parsed.city) where.city = { [Op.iLike]: `%${parsed.city}%` };
   if (parsed.district) where.district = { [Op.iLike]: `%${parsed.district}%` };
   if (parsed.furnishing) where.furnishing = parsed.furnishing;

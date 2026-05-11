@@ -23,7 +23,7 @@ export default function ListingsClientPage() {
 
   return (
     <div className="pt-20">
-      <section className="bg-primary py-20 text-primary-foreground">
+      <section className="border-b border-border bg-primary py-20 text-primary-foreground">
         <div className="container mx-auto px-6 text-center">
           <h1 className="font-display mb-4 text-4xl md:text-5xl">Our Properties</h1>
           <p className="mx-auto max-w-xl text-primary-foreground/60">Browse Dubai&apos;s most exclusive luxury properties.</p>
@@ -72,11 +72,11 @@ export default function ListingsClientPage() {
           <select
             value={status}
             onChange={(event) => setStatus(event.target.value as 'all' | 'off-plan' | 'ready')}
-            className="w-full border border-border bg-background px-4 py-2 text-sm font-body sm:w-auto sm:min-w-[150px]"
+            className="w-full border border-border bg-primary px-4 py-2 text-sm text-primary-foreground font-body sm:w-auto sm:min-w-[150px]"
           >
-            <option value="all">All Status</option>
-            <option value="off-plan">Off-Plan</option>
-            <option value="ready">Ready</option>
+            <option value="all" className="bg-primary text-primary-foreground">All Status</option>
+            <option value="off-plan" className="bg-primary text-primary-foreground">Off-Plan</option>
+            <option value="ready" className="bg-primary text-primary-foreground">Ready</option>
           </select>
         </div>
       </section>

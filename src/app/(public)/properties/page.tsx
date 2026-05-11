@@ -16,8 +16,12 @@ interface PropertiesPageProps {
 }
 
 export default async function PropertiesPage({ searchParams }: PropertiesPageProps) {
-  const data = await getPublicProperties(searchParams);
-  const activeFilterCount = Object.entries(searchParams).filter(
+  const effectiveSearchParams = {
+    ...searchParams,
+    status: typeof searchParams.status === 'string' && searchParams.status ? searchParams.status : 'for_sale',
+  };
+  const data = await getPublicProperties(effectiveSearchParams);
+  const activeFilterCount = Object.entries(effectiveSearchParams).filter(
     ([key, value]) => typeof value === 'string' && value && key !== 'page' && key !== 'limit'
   ).length;
 
@@ -25,10 +29,10 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
     <div className="bg-background pb-20 pt-20 text-foreground">
       <section className="border-b border-border bg-primary py-20 text-primary-foreground">
         <div className="container mx-auto px-6 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary-foreground/60">Property Search</p>
-          <h1 className="mt-4 font-display text-4xl md:text-5xl">Our Properties</h1>
+          {/* <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary-foreground/60">Property Search</p> */}
+          <h1 className="font-display text-4xl md:text-5xl font-bold mb-4">Our Properties</h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-primary-foreground/65">
-            Browse Dubai&apos;s most exclusive luxury properties with live listings pulled directly from your backend.
+            Browse Dubai&apos;s most exclusive luxury properties.
           </p>
         </div>
       </section>
@@ -37,14 +41,14 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
         <div className="container mx-auto px-6 py-6">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
             <div className="space-y-1">
-              <p className="text-sm uppercase tracking-[0.16em] text-muted-foreground">
+              {/* <p className="text-sm uppercase tracking-[0.16em] text-muted-foreground">
                 {data.total} listing{data.total === 1 ? '' : 's'} found
-              </p>
-              <p className="text-sm text-muted-foreground">
+              </p> */}
+              {/* <p className="text-sm text-muted-foreground">
                 {activeFilterCount > 0
                   ? `${activeFilterCount} active filter${activeFilterCount === 1 ? '' : 's'} applied`
                   : 'Use the filters below to narrow by district, type, price, and more.'}
-              </p>
+              </p> */}
             </div>
             <div className="md:hidden">
               <PropertiesMobileFilter />
@@ -75,7 +79,7 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
           <PropertiesPagination
             currentPage={data.page}
             totalPages={data.totalPages}
-            searchParams={searchParams}
+            searchParams={effectiveSearchParams}
           />
         </div>
       </section>
