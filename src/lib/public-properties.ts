@@ -110,18 +110,13 @@ export async function getPublicProperties(
         {
           model: PropertyImage,
           as: 'images',
+          limit: 1,
+          order: [['order', 'ASC']],
           required: false,
-        },
-        {
-          model: User,
-          as: 'owner',
-          attributes: ['id', 'name', 'email', 'phone', 'avatar'],
+          separate: true,
         },
       ],
-      order: [
-        ...selectedOrder,
-        [{ model: PropertyImage, as: 'images' }, 'order', 'ASC'],
-      ],
+      order: selectedOrder,
       limit,
       offset,
       distinct: true,
