@@ -120,13 +120,80 @@ export function PropertyForm({ property, mode }: PropertyFormProps) {
     );
   };
 
-  const fileToBase64 = (file: File): Promise<string> =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
+  // Downscale/recompress large photos in-browser before upload so we never
+  // ship multi-megabyte originals over the wire.
+  const compressImage = async (file: File, maxDimension = 2000, quality = 0.82): Promise<Blob> => {
+    if (!file.type.startsWith('image/') || file.type === 'image/svg+xml') return file;
+
+    try {
+      const bitmap = await createImageBitmap(file);
+      const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
+      const width = Math.round(bitmap.width * scale);
+      const height = Math.round(bitmap.height * scale);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return file;
+
+      ctx.drawImage(bitmap, 0, 0, width, height);
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', quality));
+      return blob ?? file;
+    } catch {
+      return file;
+    }
+  };
+
+  // Uploads directly from the browser to Cloudinary using a short-lived
+  // signature, so the image bytes never pass through our own API route
+  // (which is subject to the hosting platform's request size limit).
+  const uploadImageDirect = async (file: File): Promise<{ url: string; publicId: string }> => {
+    const sigResponse = await fetch('/api/cloudinary/signature', { method: 'POST' });
+    const sigJson = await parseApiResponse(sigResponse);
+    if (!sigResponse.ok || !sigJson.success) {
+      throw new Error(sigJson.error || 'Could not prepare image upload');
+    }
+
+    const { timestamp, folder, transformation, signature, apiKey, cloudName } = sigJson.data;
+    const blob = await compressImage(file);
+
+    const formData = new FormData();
+    formData.append('file', blob, file.name);
+    formData.append('api_key', apiKey);
+    formData.append('timestamp', String(timestamp));
+    formData.append('folder', folder);
+    formData.append('transformation', transformation);
+    formData.append('signature', signature);
+
+    const uploadResponse = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+      method: 'POST',
+      body: formData,
     });
+    const uploadJson = await uploadResponse.json();
+
+    if (!uploadResponse.ok) {
+      throw new Error(uploadJson?.error?.message || 'Image upload to Cloudinary failed');
+    }
+
+    return { url: uploadJson.secure_url, publicId: uploadJson.public_id };
+  };
+
+  const parseApiResponse = async (response: Response) => {
+    const raw = await response.text();
+
+    try {
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {
+        success: false,
+        error:
+          raw && raw.length > 0
+            ? raw
+            : `Request failed with status ${response.status}`,
+      };
+    }
+  };
 
   const onSubmit = async (data: PropertyFormData) => {
     setLoading(true);
@@ -141,8 +208,8 @@ export function PropertyForm({ property, mode }: PropertyFormProps) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
-        const json = await response.json();
-        if (!json.success) throw new Error(json.error);
+        const json = await parseApiResponse(response);
+        if (!response.ok || !json.success) throw new Error(json.error || 'Property creation failed');
         propertyId = json.data.id;
       } else {
         const response = await fetch(`/api/properties/${property!.id}`, {
@@ -150,26 +217,33 @@ export function PropertyForm({ property, mode }: PropertyFormProps) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
-        const json = await response.json();
-        if (!json.success) throw new Error(json.error);
+        const json = await parseApiResponse(response);
+        if (!response.ok || !json.success) throw new Error(json.error || 'Property update failed');
       }
 
       if (imageFiles.length > 0 && propertyId) {
-        const base64Images = await Promise.all(imageFiles.map((item) => fileToBase64(item.file)));
-        const response = await fetch(`/api/properties/${propertyId}/images`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ images: base64Images.map((base64) => ({ base64 })) }),
-        });
-        const json = await response.json();
-        if (!response.ok || !json.success) {
-          const uploadError = json.error || 'Image upload failed';
+        try {
+          const uploaded = await Promise.all(imageFiles.map((item) => uploadImageDirect(item.file)));
+
+          const response = await fetch(`/api/properties/${propertyId}/images`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ images: uploaded }),
+          });
+          const json = await parseApiResponse(response);
+
+          if (!response.ok || !json.success) {
+            throw new Error(json.error || 'Image upload failed');
+          }
+        } catch (uploadError) {
+          const message = uploadError instanceof Error ? uploadError.message : 'Image upload failed';
+
           toast({
             title: mode === 'create' ? 'Property saved, but image upload failed' : 'Property updated, but image upload failed',
             description:
               mode === 'create'
-                ? `${uploadError} The listing was created without uploaded images. Fix Cloudinary and retry from the edit page.`
-                : `${uploadError} Your property changes were saved, but the new images were not uploaded.`,
+                ? `${message} The listing was created without all uploaded images. Retry from the edit page.`
+                : `${message} Your property changes were saved, but some new images were not uploaded.`,
           } as Parameters<typeof toast>[0]);
           router.push(`/admin/properties/${propertyId}`);
           return;

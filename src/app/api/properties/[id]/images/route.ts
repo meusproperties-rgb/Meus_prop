@@ -21,7 +21,9 @@ export async function POST(request: NextRequest, { params }: Params) {
     }
 
     const body = await request.json();
-    const { images } = body as { images: Array<{ base64: string; caption?: string }> };
+    const { images } = body as {
+      images: Array<{ base64?: string; url?: string; publicId?: string; caption?: string }>;
+    };
 
     if (!images || !Array.isArray(images) || images.length === 0) {
       return NextResponse.json({ success: false, error: 'No images provided' }, { status: 400 });
@@ -36,7 +38,21 @@ export async function POST(request: NextRequest, { params }: Params) {
 
     const uploaded = await Promise.all(
       images.map(async (img, index) => {
-        const { url, publicId } = await uploadImage(img.base64);
+        // Preferred path: browser already uploaded directly to Cloudinary
+        // (bypasses the platform's request body size limit). Falls back to
+        // server-side upload only if a raw base64 payload was sent instead.
+        let url = img.url;
+        let publicId = img.publicId;
+
+        if (!url || !publicId) {
+          if (!img.base64) {
+            throw new Error('Each image requires either an uploaded url/publicId or a base64 payload');
+          }
+          const result = await uploadImage(img.base64);
+          url = result.url;
+          publicId = result.publicId;
+        }
+
         return PropertyImage.create({
           propertyId: params.id,
           url,
