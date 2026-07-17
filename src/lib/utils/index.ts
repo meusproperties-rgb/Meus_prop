@@ -1,6 +1,8 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
+export const DEFAULT_PROPERTY_IMAGE = '/lovable-assets/property-1.jpg';
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -99,6 +101,16 @@ export function buildQueryString(params: Record<string, unknown>): string {
     }
   });
   return searchParams.toString();
+}
+
+export function getPropertyDisplayImage(
+  property: {
+    coverImage?: string | null;
+    images?: Array<{ url?: string | null }> | null;
+  },
+  fallback = DEFAULT_PROPERTY_IMAGE
+): string {
+  return property.coverImage || property.images?.[0]?.url || fallback;
 }
 
 export const PROPERTY_AMENITIES = [

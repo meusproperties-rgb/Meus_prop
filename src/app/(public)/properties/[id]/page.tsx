@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Bath, Bed, Calendar, Car, ChevronLeft, LandPlot, Maximize, MessageCircle, Phone } from 'lucide-react';
+import { PropertyGallery } from '@/components/property/PropertyGallery';
 import { Button } from '@/components/ui/button';
 import { getPublicProperty } from '@/lib/public-properties';
-import { formatArea, formatFullPrice, getStatusLabel } from '@/lib/utils/index';
+import { formatArea, formatFullPrice, getPropertyDisplayImage, getStatusLabel } from '@/lib/utils/index';
 
 interface PageProps {
   params: { id: string };
@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     openGraph: {
       title: property.title,
       description: property.description.slice(0, 160),
-      images: property.coverImage ? [property.coverImage] : property.images?.[0]?.url ? [property.images[0].url] : [],
+      images: [getPropertyDisplayImage(property)],
     },
   };
 }
@@ -48,7 +48,6 @@ export default async function PropertyDetailPage({ params }: PageProps) {
             order: 0,
           }]
         : [];
-  const heroImage = galleryImages[0]?.url || property.coverImage;
   const features = property.features?.length ? property.features : property.amenities || [];
 
   const specs = [
@@ -61,27 +60,22 @@ export default async function PropertyDetailPage({ params }: PageProps) {
 
   return (
     <div className="bg-background pt-20 text-foreground">
-      <section className="relative h-[60vh]">
-        {heroImage ? (
-          <Image
-            src={heroImage}
-            alt={property.title}
-            fill
-            className="h-full w-full object-cover"
-            sizes="100vw"
-            priority
-          />
-        ) : (
-          <div className="h-full w-full bg-secondary" />
-        )}
-        <div className="absolute inset-0 bg-primary/30" />
-        <Link
-          href="/listings"
-          className="absolute left-6 top-6 z-10 flex items-center gap-2 text-primary-foreground/80 transition-colors hover:text-primary-foreground"
-        >
-          <ChevronLeft size={20} />
-          <span className="text-sm uppercase tracking-widest">Back</span>
-        </Link>
+      <section className="border-b border-border bg-primary/95 py-6 text-primary-foreground">
+        <div className="container mx-auto px-6">
+          <Link
+            href="/listings"
+            className="inline-flex items-center gap-2 text-primary-foreground/80 transition-colors hover:text-primary-foreground"
+          >
+            <ChevronLeft size={20} />
+            <span className="text-sm uppercase tracking-widest">Back To Listings</span>
+          </Link>
+        </div>
+      </section>
+
+      <section className="py-8">
+        <div className="container mx-auto px-6">
+          <PropertyGallery images={galleryImages} title={property.title} />
+        </div>
       </section>
 
       <section className="py-16">

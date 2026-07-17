@@ -1,22 +1,30 @@
 import { v2 as cloudinary } from 'cloudinary';
 
+function readEnv(name: 'CLOUDINARY_CLOUD_NAME' | 'CLOUDINARY_API_KEY' | 'CLOUDINARY_API_SECRET') {
+  const value = process.env[name];
+  if (!value) return '';
+  return value.trim().replace(/^['"]|['"]$/g, '');
+}
+
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloud_name: readEnv('CLOUDINARY_CLOUD_NAME'),
+  api_key: readEnv('CLOUDINARY_API_KEY'),
+  api_secret: readEnv('CLOUDINARY_API_SECRET'),
 });
 
 function assertCloudinaryConfig() {
   const missing = [
-    ['CLOUDINARY_CLOUD_NAME', process.env.CLOUDINARY_CLOUD_NAME],
-    ['CLOUDINARY_API_KEY', process.env.CLOUDINARY_API_KEY],
-    ['CLOUDINARY_API_SECRET', process.env.CLOUDINARY_API_SECRET],
+    ['CLOUDINARY_CLOUD_NAME', readEnv('CLOUDINARY_CLOUD_NAME')],
+    ['CLOUDINARY_API_KEY', readEnv('CLOUDINARY_API_KEY')],
+    ['CLOUDINARY_API_SECRET', readEnv('CLOUDINARY_API_SECRET')],
   ]
     .filter(([, value]) => !value || String(value).startsWith('your-'))
     .map(([key]) => key);
 
   if (missing.length > 0) {
-    throw new Error(`Cloudinary is not configured. Update ${missing.join(', ')} in .env.local.`);
+    throw new Error(
+      `Cloudinary is not configured. Update ${missing.join(', ')} in .env.local and restart the Next.js server.`
+    );
   }
 }
 

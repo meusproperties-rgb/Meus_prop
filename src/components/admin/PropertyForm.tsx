@@ -163,7 +163,16 @@ export function PropertyForm({ property, mode }: PropertyFormProps) {
         });
         const json = await response.json();
         if (!response.ok || !json.success) {
-          throw new Error(json.error || 'Image upload failed');
+          const uploadError = json.error || 'Image upload failed';
+          toast({
+            title: mode === 'create' ? 'Property saved, but image upload failed' : 'Property updated, but image upload failed',
+            description:
+              mode === 'create'
+                ? `${uploadError} The listing was created without uploaded images. Fix Cloudinary and retry from the edit page.`
+                : `${uploadError} Your property changes were saved, but the new images were not uploaded.`,
+          } as Parameters<typeof toast>[0]);
+          router.push(`/admin/properties/${propertyId}`);
+          return;
         }
       }
 

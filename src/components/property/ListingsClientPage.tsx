@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { formatSitePrice, siteLocations, siteProperties } from '@/lib/site-properties';
+import { DEFAULT_PROPERTY_IMAGE } from '@/lib/utils/index';
 
 export default function ListingsClientPage() {
   const [tab, setTab] = useState<'buy' | 'rent'>('buy');
@@ -91,7 +92,7 @@ export default function ListingsClientPage() {
                 <div key={property.id} className="group border border-border bg-card">
                   <div className="overflow-hidden">
                     <img
-                      src={property.images[0]}
+                      src={property.images[0] || DEFAULT_PROPERTY_IMAGE}
                       alt={property.title}
                       className="h-64 w-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />

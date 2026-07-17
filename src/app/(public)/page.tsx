@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Diamond, Building2, TrendingUp, Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getFeaturedPublicProperties } from '@/lib/public-properties';
-import { formatFullPrice } from '@/lib/utils/index';
+import { formatFullPrice, getPropertyDisplayImage } from '@/lib/utils/index';
 
 const trustItems = [
   { icon: Diamond, label: 'Luxury Expertise' },
@@ -114,7 +114,7 @@ export default async function HomePage() {
               <div key={property.id} className="group bg-card">
                 <div className="overflow-hidden">
                   <img
-                    src={property.coverImage || property.images?.[0]?.url || '/lovable-assets/property-1.jpg'}
+                    src={getPropertyDisplayImage(property)}
                     alt={property.title}
                     className="h-64 w-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />

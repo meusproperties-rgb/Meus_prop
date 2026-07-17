@@ -14,8 +14,8 @@ export function PropertyGallery({ images, title }: PropertyGalleryProps) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const displayImages = [...images].sort((a, b) => a.order - b.order);
-  const gridImages = displayImages.slice(0, 5);
-  const isSingleImage = displayImages.length === 1;
+  const featuredImage = displayImages[0];
+  const thumbnailImages = displayImages.slice(1);
 
   const openLightbox = (index: number) => setLightboxIndex(index);
   const closeLightbox = () => setLightboxIndex(null);
@@ -35,43 +35,49 @@ export function PropertyGallery({ images, title }: PropertyGalleryProps) {
 
   return (
     <>
-      <div
-        className={
-          isSingleImage
-            ? 'relative h-[320px] cursor-pointer overflow-hidden border border-white/10 bg-[#111111] sm:h-[460px] lg:h-[560px]'
-            : 'grid cursor-pointer grid-cols-2 gap-2 overflow-hidden sm:h-[460px] lg:h-[560px] lg:grid-cols-4 lg:grid-rows-2'
-        }
-        onClick={() => openLightbox(0)}
-      >
-        {gridImages.map((img, index) => (
-          <div
-            key={img.id}
-            className={`group relative min-h-[160px] overflow-hidden bg-[#111111] ${
-              !isSingleImage && index === 0 ? 'col-span-2 row-span-2 min-h-[320px]' : ''
-            }`}
-            onClick={(e) => { e.stopPropagation(); openLightbox(index); }}
-          >
-            <Image
-              src={img.url}
-              alt={img.caption || `${title} - Image ${index + 1}`}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
-              sizes="(max-width: 768px) 100vw, 50vw"
-              priority={index === 0}
-            />
-            {index === 4 && displayImages.length > 5 && (
-              <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                <div className="text-white text-center">
-                  <Grid3X3 className="w-6 h-6 mx-auto mb-1" />
-                  <span className="text-lg font-semibold">+{displayImages.length - 5} more</span>
-                </div>
-              </div>
-            )}
-            {index === 0 && (
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            )}
+      <div className="space-y-4">
+        <div
+          className="group relative aspect-[3/2] cursor-pointer overflow-hidden border border-white/10 bg-[#111111]"
+          onClick={() => openLightbox(0)}
+        >
+          <Image
+            src={featuredImage.url}
+            alt={featuredImage.caption || `${title} - Image 1`}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+            sizes="(max-width: 1280px) 100vw, 66vw"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
+          {displayImages.length > 1 ? (
+            <div className="absolute bottom-4 right-4 flex items-center gap-2 bg-black/55 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/85">
+              <Grid3X3 className="h-4 w-4" />
+              {displayImages.length} Photos
+            </div>
+          ) : null}
+        </div>
+
+        {thumbnailImages.length > 0 ? (
+          <div className="flex gap-3 overflow-x-auto pb-2">
+            {thumbnailImages.map((img, index) => (
+              <button
+                key={img.id}
+                type="button"
+                onClick={() => openLightbox(index + 1)}
+                className="group relative aspect-[3/2] w-44 shrink-0 overflow-hidden border border-white/10 bg-[#111111] text-left"
+              >
+                <Image
+                  src={img.url}
+                  alt={img.caption || `${title} - Image ${index + 2}`}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  sizes="176px"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/25 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+              </button>
+            ))}
           </div>
-        ))}
+        ) : null}
       </div>
 
       {displayImages.length > 1 && (
@@ -113,14 +119,14 @@ export function PropertyGallery({ images, title }: PropertyGalleryProps) {
           </button>
 
           {/* Thumbnails */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 overflow-x-auto max-w-full px-4">
+          <div className="absolute bottom-4 left-1/2 flex max-w-full -translate-x-1/2 gap-2 overflow-x-auto px-4">
             {displayImages.map((img, i) => (
               <button
                 key={img.id}
                 onClick={(e) => { e.stopPropagation(); setLightboxIndex(i); }}
-                className={`relative h-10 w-14 shrink-0 overflow-hidden border-2 transition-all ${i === lightboxIndex ? 'border-white' : 'border-white/30 opacity-60 hover:opacity-100'}`}
+                className={`relative aspect-[3/2] w-20 shrink-0 overflow-hidden border-2 transition-all ${i === lightboxIndex ? 'border-white' : 'border-white/30 opacity-60 hover:opacity-100'}`}
               >
-                <Image src={img.url} alt="" fill className="object-cover" sizes="56px" />
+                <Image src={img.url} alt="" fill className="object-cover" sizes="80px" />
               </button>
             ))}
           </div>

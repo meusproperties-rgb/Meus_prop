@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Bath, Bed, Maximize } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { formatArea, formatFullPrice, getPropertyTypeLabel, getStatusLabel } from '@/lib/utils/index';
+import { formatArea, formatFullPrice, getPropertyDisplayImage, getPropertyTypeLabel, getStatusLabel } from '@/lib/utils/index';
 import type { Property } from '@/types/index';
 
 interface PropertyCardProps {
@@ -13,7 +13,7 @@ interface PropertyCardProps {
 }
 
 export function PropertyCard({ property, className }: PropertyCardProps) {
-  const imageUrl = property.coverImage || property.images?.[0]?.url || null;
+  const imageUrl = getPropertyDisplayImage(property);
   const summary =
     property.description.length > 120 ? `${property.description.slice(0, 120).trim()}...` : property.description;
 
@@ -21,17 +21,13 @@ export function PropertyCard({ property, className }: PropertyCardProps) {
     <Link href={`/listings/${property.slug}`} className={className}>
       <article className="group h-full overflow-hidden border border-border bg-card transition-transform duration-300 hover:-translate-y-1 hover:border-white/20">
         <div className="relative h-64 w-full overflow-hidden">
-          {imageUrl ? (
-            <Image
-              src={imageUrl}
-              alt={property.title}
-              fill
-              className="object-cover transition-transform duration-700 group-hover:scale-105"
-              sizes="(max-width: 1280px) 50vw, 33vw"
-            />
-          ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-[#161616] via-[#101010] to-[#1b1b1b]" />
-          )}
+          <Image
+            src={imageUrl}
+            alt={property.title}
+            fill
+            className="object-cover transition-transform duration-700 group-hover:scale-105"
+            sizes="(max-width: 1280px) 50vw, 33vw"
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
           <div className="absolute left-4 top-4 flex flex-wrap gap-2">
             <span className="border border-white/15 bg-black/35 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/85">
@@ -46,9 +42,6 @@ export function PropertyCard({ property, className }: PropertyCardProps) {
           <div className="absolute inset-x-4 bottom-4">
             <p className="text-xs uppercase tracking-[0.18em] text-white/70">{property.district || property.city}</p>
             <h3 className="mt-2 font-display text-2xl font-semibold leading-tight text-white">{property.title}</h3>
-            {!imageUrl ? (
-              <p className="mt-2 text-xs uppercase tracking-[0.14em] text-white/55">No image available from API</p>
-            ) : null}
           </div>
         </div>
 
