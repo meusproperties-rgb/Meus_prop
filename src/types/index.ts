@@ -82,7 +82,7 @@ export interface User {
 
 export interface Enquiry {
   id: string;
-  propertyId: string;
+  propertyId: string | null;
   userId: string | null;
   name: string;
   email: string;

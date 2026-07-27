@@ -30,6 +30,7 @@ export async function GET(request: NextRequest) {
           model: Property,
           as: 'property',
           attributes: ['id', 'title', 'slug', 'coverImage'],
+          required: false,
         },
         {
           model: User,
@@ -66,9 +67,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validated = enquirySchema.parse(body);
 
-    const property = await Property.findByPk(validated.propertyId);
-    if (!property || !property.isActive) {
-      return NextResponse.json({ success: false, error: 'Property not found' }, { status: 404 });
+    if (validated.propertyId) {
+      const property = await Property.findByPk(validated.propertyId);
+      if (!property || !property.isActive) {
+        return NextResponse.json({ success: false, error: 'Property not found' }, { status: 404 });
+      }
     }
 
     const session = await getServerSession(authOptions);

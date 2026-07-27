@@ -1,7 +1,47 @@
+'use client';
+
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { toast } from '@/components/ui/toaster';
 import { Mail, MapPin, Phone } from 'lucide-react';
 
 export default function ContactPage() {
+  const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
+      toast({ title: 'Please fill in all required fields.', variant: 'destructive' } as Parameters<typeof toast>[0]);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch('/api/enquiries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      const json = await response.json();
+
+      if (!response.ok || !json.success) {
+        throw new Error(json.error || 'Failed to send message');
+      }
+
+      toast({ title: "Thank you! We'll be in touch shortly.", variant: 'success' } as Parameters<typeof toast>[0]);
+      setForm({ name: '', email: '', phone: '', message: '' });
+    } catch (error) {
+      toast({
+        title: 'Unable to send message',
+        description: error instanceof Error ? error.message : 'Something went wrong.',
+        variant: 'destructive',
+      } as Parameters<typeof toast>[0]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="pt-20">
       <section className="bg-primary py-20 text-primary-foreground">
@@ -14,25 +54,47 @@ export default function ContactPage() {
       </section>
       <section className="py-20 md:py-24">
         <div className="container mx-auto grid gap-16 px-6 md:grid-cols-2">
-          <form className="space-y-6">
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label className="mb-2 block text-xs uppercase tracking-widest text-muted-foreground">Name *</label>
-              <input className="w-full border border-border bg-background px-4 py-3 text-sm font-body transition-colors focus:border-accent focus:outline-none" />
+              <input
+                className="w-full border border-border bg-background px-4 py-3 text-sm font-body transition-colors focus:border-accent focus:outline-none"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                maxLength={100}
+              />
             </div>
             <div>
               <label className="mb-2 block text-xs uppercase tracking-widest text-muted-foreground">Email *</label>
-              <input className="w-full border border-border bg-background px-4 py-3 text-sm font-body transition-colors focus:border-accent focus:outline-none" />
+              <input
+                type="email"
+                className="w-full border border-border bg-background px-4 py-3 text-sm font-body transition-colors focus:border-accent focus:outline-none"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                maxLength={255}
+              />
             </div>
             <div>
               <label className="mb-2 block text-xs uppercase tracking-widest text-muted-foreground">Phone</label>
-              <input className="w-full border border-border bg-background px-4 py-3 text-sm font-body transition-colors focus:border-accent focus:outline-none" />
+              <input
+                type="tel"
+                className="w-full border border-border bg-background px-4 py-3 text-sm font-body transition-colors focus:border-accent focus:outline-none"
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              />
             </div>
             <div>
               <label className="mb-2 block text-xs uppercase tracking-widest text-muted-foreground">Message *</label>
-              <textarea rows={5} className="w-full resize-none border border-border bg-background px-4 py-3 text-sm font-body transition-colors focus:border-accent focus:outline-none" />
+              <textarea
+                rows={5}
+                className="w-full resize-none border border-border bg-background px-4 py-3 text-sm font-body transition-colors focus:border-accent focus:outline-none"
+                value={form.message}
+                onChange={(e) => setForm({ ...form, message: e.target.value })}
+                maxLength={2000}
+              />
             </div>
-            <Button variant="cta" size="lg" type="submit" className="w-full">
-              Send Message
+            <Button variant="cta" size="lg" type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Sending...' : 'Send Message'}
             </Button>
           </form>
 

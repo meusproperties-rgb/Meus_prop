@@ -129,7 +129,7 @@ async function main() {
     await client.query(`
       CREATE TABLE IF NOT EXISTS enquiries (
         "id" UUID PRIMARY KEY,
-        "propertyId" UUID NOT NULL REFERENCES properties("id") ON DELETE CASCADE,
+        "propertyId" UUID REFERENCES properties("id") ON DELETE CASCADE,
         "userId" UUID REFERENCES users("id") ON DELETE SET NULL,
         "name" VARCHAR(100) NOT NULL,
         "email" VARCHAR(255) NOT NULL,
@@ -141,6 +141,9 @@ async function main() {
         "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
     `);
+
+    // Allow general contact-form enquiries (no property) on databases migrated before this column was nullable.
+    await client.query(`ALTER TABLE enquiries ALTER COLUMN "propertyId" DROP NOT NULL;`);
 
     await client.query('CREATE INDEX IF NOT EXISTS users_role_idx ON users ("role");');
     await client.query('CREATE INDEX IF NOT EXISTS properties_type_idx ON properties ("type");');

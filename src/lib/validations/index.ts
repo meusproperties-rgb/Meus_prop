@@ -61,7 +61,7 @@ export const enquirySchema = z.object({
   email: z.string().email('Invalid email address'),
   phone: z.string().optional(),
   message: z.string().min(10, 'Message must be at least 10 characters').max(2000),
-  propertyId: z.string().uuid('Invalid property ID'),
+  propertyId: z.string().uuid('Invalid property ID').optional(),
 });
 
 export type EnquiryFormData = z.infer<typeof enquirySchema>;

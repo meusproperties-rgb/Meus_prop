@@ -119,7 +119,7 @@ export type EnquiryStatus = 'pending' | 'read' | 'replied' | 'closed';
 
 export interface EnquiryAttributes {
   id: string;
-  propertyId: string;
+  propertyId: string | null;
   userId: string | null;
   name: string;
   email: string;
@@ -133,7 +133,7 @@ export interface EnquiryAttributes {
 
 export type EnquiryCreationAttributes = Optional<
   EnquiryAttributes,
-  'id' | 'userId' | 'phone' | 'status' | 'adminNote' | 'createdAt' | 'updatedAt'
+  'id' | 'propertyId' | 'userId' | 'phone' | 'status' | 'adminNote' | 'createdAt' | 'updatedAt'
 >;
 
 export class Enquiry
@@ -141,7 +141,7 @@ export class Enquiry
   implements EnquiryAttributes
 {
   declare id: string;
-  declare propertyId: string;
+  declare propertyId: string | null;
   declare userId: string | null;
   declare name: string;
   declare email: string;
@@ -158,7 +158,7 @@ Enquiry.init(
     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
     propertyId: {
       type: DataTypes.UUID,
-      allowNull: false,
+      allowNull: true,
       references: { model: 'properties', key: 'id' },
     },
     userId: {
